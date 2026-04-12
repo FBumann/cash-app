@@ -376,7 +376,28 @@
 </div>
 
 <script>
+// @ts-check
 'use strict';
+
+/**
+ * @typedef {{ id: string, name: string, price: number }} MenuItem
+ * @typedef {MenuItem & { qty: number }} CartLine
+ * @typedef {{ name: string, price: number, qty: number }} OrderLine
+ * @typedef {{ id: string, time: string, items: OrderLine[], total: number }} Order
+ */
+
+/**
+ * Get element by id, asserting non-null. Throws loudly if the id is wrong —
+ * better than a silent null deref deep in a render.
+ * @template {HTMLElement} T
+ * @param {string} id
+ * @returns {T}
+ */
+function byId(id) {
+  const el = document.getElementById(id);
+  if (!el) throw new Error(`#${id} missing`);
+  return /** @type {T} */ (el);
+}
 
 const KEYS = {
   reusables: 'club-register-reusables',
@@ -384,22 +405,25 @@ const KEYS = {
   orders: 'club-register-orders',
 };
 
-const state = {
-  reusables: load(KEYS.reusables, []),
-  active: load(KEYS.active, []),
-  orders: load(KEYS.orders, []),
-  cart: [],
-};
-
+/** @template T @param {string} key @param {T} fallback @returns {T} */
 function load(key, fallback) {
   try {
     const v = localStorage.getItem(key);
     return v ? JSON.parse(v) : fallback;
   } catch { return fallback; }
 }
+/** @param {string} key @param {unknown} val */
 function save(key, val) {
   localStorage.setItem(key, JSON.stringify(val));
 }
+
+const state = {
+  /** @type {MenuItem[]} */ reusables: load(KEYS.reusables, /** @type {MenuItem[]} */ ([])),
+  /** @type {string[]}   */ active:    load(KEYS.active,    /** @type {string[]}   */ ([])),
+  /** @type {Order[]}    */ orders:    load(KEYS.orders,    /** @type {Order[]}    */ ([])),
+  /** @type {CartLine[]} */ cart:      [],
+};
+
 function saveAll() {
   save(KEYS.reusables, state.reusables);
   save(KEYS.active, state.active);
@@ -408,10 +432,11 @@ function saveAll() {
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 
-// EUR formatting with comma decimal
+/** @param {number} n */
 function fmt(n) {
   return n.toFixed(2).replace('.', ',') + ' €';
 }
+/** @param {string} str @returns {number} NaN if unparseable */
 function parseEur(str) {
   if (!str) return NaN;
   const cleaned = String(str).replace(/\s|€/g, '').replace(',', '.');
@@ -420,10 +445,18 @@ function parseEur(str) {
 
 // ---- Tabs ----
 document.querySelectorAll('nav.tabs button').forEach(btn => {
-  btn.addEventListener('click', () => showTab(btn.dataset.tab));
+  btn.addEventListener('click', () => {
+    const tab = /** @type {HTMLElement} */ (btn).dataset.tab;
+    if (tab) showTab(tab);
+  });
 });
+
+/** @param {string} tab */
 function showTab(tab) {
-  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('nav.tabs button').forEach(b => {
+    const t = /** @type {HTMLElement} */ (b).dataset.tab;
+    b.classList.toggle('active', t === tab);
+  });
   document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === tab));
   if (tab === 'summary') renderSummary();
   if (tab === 'editor') renderEditor();
@@ -431,17 +464,14 @@ function showTab(tab) {
 }
 
 // ---- Register ----
-const menuGridEl = document.getElementById('menuGrid');
-const cartItemsEl = document.getElementById('cartItems');
-const cartTotalEl = document.getElementById('cartTotal');
-
 function renderRegister() {
-  menuGridEl.innerHTML = '';
+  const grid = byId('menuGrid');
+  grid.innerHTML = '';
   if (state.active.length === 0) {
     const empty = document.createElement('div');
     empty.className = 'menu-empty';
     empty.textContent = 'Kein aktives Menü. Im Tab "Menü" Artikel hinzufügen.';
-    menuGridEl.appendChild(empty);
+    grid.appendChild(empty);
   } else {
     state.active.forEach(id => {
       const item = state.reusables.find(r => r.id === id);
@@ -450,12 +480,13 @@ function renderRegister() {
       btn.className = 'menu-item';
       btn.innerHTML = `<div class="name">${escapeHtml(item.name)}</div><div class="price">${fmt(item.price)}</div>`;
       btn.addEventListener('click', () => addToCart(item));
-      menuGridEl.appendChild(btn);
+      grid.appendChild(btn);
     });
   }
   renderCart();
 }
 
+/** @param {MenuItem} item */
 function addToCart(item) {
   const existing = state.cart.find(c => c.id === item.id);
   if (existing) existing.qty++;
@@ -464,12 +495,13 @@ function addToCart(item) {
 }
 
 function renderCart() {
-  cartItemsEl.innerHTML = '';
+  const list = byId('cartItems');
+  list.innerHTML = '';
   if (state.cart.length === 0) {
     const empty = document.createElement('div');
     empty.className = 'cart-empty';
     empty.textContent = 'Warenkorb leer';
-    cartItemsEl.appendChild(empty);
+    list.appendChild(empty);
   } else {
     state.cart.forEach(c => {
       const row = document.createElement('div');
@@ -484,97 +516,91 @@ function renderCart() {
           <span class="count">${c.qty}</span>
           <button data-act="inc">+</button>
         </div>`;
-      row.querySelector('[data-act="inc"]').addEventListener('click', () => { c.qty++; renderCart(); });
-      row.querySelector('[data-act="dec"]').addEventListener('click', () => {
+      row.querySelector('[data-act="inc"]')?.addEventListener('click', () => { c.qty++; renderCart(); });
+      row.querySelector('[data-act="dec"]')?.addEventListener('click', () => {
         c.qty--;
         if (c.qty <= 0) state.cart = state.cart.filter(x => x !== c);
         renderCart();
       });
-      cartItemsEl.appendChild(row);
+      list.appendChild(row);
     });
   }
-  cartTotalEl.textContent = fmt(cartTotal());
-  document.getElementById('charge').disabled = state.cart.length === 0;
+  byId('cartTotal').textContent = fmt(cartTotal());
+  /** @type {HTMLButtonElement} */ (byId('charge')).disabled = state.cart.length === 0;
 }
 
 function cartTotal() {
   return state.cart.reduce((s, c) => s + c.price * c.qty, 0);
 }
 
-document.getElementById('clearCart').addEventListener('click', () => {
+byId('clearCart').addEventListener('click', () => {
   state.cart = [];
   renderCart();
 });
 
-document.getElementById('charge').addEventListener('click', () => {
+byId('charge').addEventListener('click', () => {
   if (state.cart.length === 0) return;
   openPayment();
 });
 
 // ---- Payment ----
-const cashGivenEl = document.getElementById('cashGiven');
-const changeRowEl = document.getElementById('changeRow');
-const changeAmountEl = document.getElementById('changeAmount');
-const payTotalEl = document.getElementById('payTotal');
-const quickCashEl = document.getElementById('quickCash');
-
 function openPayment() {
-  showTab('payment'); // not a tab, but reuses logic
+  showTab('payment');
   document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === 'payment'));
-  payTotalEl.textContent = fmt(cartTotal());
-  cashGivenEl.value = '';
+  byId('payTotal').textContent = fmt(cartTotal());
+  const cash = /** @type {HTMLInputElement} */ (byId('cashGiven'));
+  cash.value = '';
   updateChange();
   buildQuickCash();
-  setTimeout(() => cashGivenEl.focus(), 50);
+  setTimeout(() => cash.focus(), 50);
 }
 
 function buildQuickCash() {
-  quickCashEl.innerHTML = '';
+  const wrap = byId('quickCash');
+  wrap.innerHTML = '';
   const total = cartTotal();
   const denoms = [5, 10, 20, 50];
+  /** @type {Set<number>} */
   const suggestions = new Set();
-  // exact + next round-ups
   suggestions.add(Math.ceil(total));
   denoms.forEach(d => { if (d >= total) suggestions.add(d); });
-  const sorted = [...suggestions].sort((a,b) => a - b).slice(0, 4);
+  const sorted = [...suggestions].sort((a, b) => a - b).slice(0, 4);
   sorted.forEach(v => {
     const b = document.createElement('button');
     b.type = 'button';
     b.textContent = fmt(v);
     b.addEventListener('click', () => {
-      cashGivenEl.value = v.toFixed(2).replace('.', ',');
+      /** @type {HTMLInputElement} */ (byId('cashGiven')).value = v.toFixed(2).replace('.', ',');
       updateChange();
     });
-    quickCashEl.appendChild(b);
+    wrap.appendChild(b);
   });
 }
 
-cashGivenEl.addEventListener('input', updateChange);
+byId('cashGiven').addEventListener('input', updateChange);
 
 function updateChange() {
   const total = cartTotal();
-  const given = parseEur(cashGivenEl.value);
+  const given = parseEur(/** @type {HTMLInputElement} */ (byId('cashGiven')).value);
   if (isNaN(given)) {
-    changeAmountEl.textContent = fmt(0);
-    changeRowEl.classList.remove('negative');
+    byId('changeAmount').textContent = fmt(0);
+    byId('changeRow').classList.remove('negative');
     return;
   }
   const change = given - total;
-  changeAmountEl.textContent = fmt(change);
-  changeRowEl.classList.toggle('negative', change < 0);
+  byId('changeAmount').textContent = fmt(change);
+  byId('changeRow').classList.toggle('negative', change < 0);
 }
 
-document.getElementById('cancelPay').addEventListener('click', () => {
-  showTab('register');
-});
+byId('cancelPay').addEventListener('click', () => showTab('register'));
 
-document.getElementById('confirmPay').addEventListener('click', () => {
-  const total = cartTotal();
+byId('confirmPay').addEventListener('click', () => {
+  /** @type {Order} */
   const order = {
     id: uid(),
     time: new Date().toISOString(),
     items: state.cart.map(c => ({ name: c.name, price: c.price, qty: c.qty })),
-    total,
+    total: cartTotal(),
   };
   state.orders.push(order);
   save(KEYS.orders, state.orders);
@@ -583,14 +609,14 @@ document.getElementById('confirmPay').addEventListener('click', () => {
 });
 
 // ---- Editor ----
-const activeListEl = document.getElementById('activeList');
-const libraryListEl = document.getElementById('libraryList');
-
 function renderEditor() {
+  const activeEl = byId('activeList');
+  const libEl = byId('libraryList');
+
   // Active
-  activeListEl.innerHTML = '';
+  activeEl.innerHTML = '';
   if (state.active.length === 0) {
-    activeListEl.innerHTML = '<div class="editor-empty">Tippe in der Bibliothek auf +, um Artikel hinzuzufügen.</div>';
+    activeEl.innerHTML = '<div class="editor-empty">Tippe in der Bibliothek auf +, um Artikel hinzuzufügen.</div>';
   } else {
     state.active.forEach(id => {
       const item = state.reusables.find(r => r.id === id);
@@ -605,19 +631,19 @@ function renderEditor() {
         <div class="actions">
           <button class="icon-btn" data-remove>−</button>
         </div>`;
-      row.querySelector('[data-remove]').addEventListener('click', () => {
+      row.querySelector('[data-remove]')?.addEventListener('click', () => {
         state.active = state.active.filter(x => x !== id);
         save(KEYS.active, state.active);
         renderEditor();
       });
-      activeListEl.appendChild(row);
+      activeEl.appendChild(row);
     });
   }
 
   // Library
-  libraryListEl.innerHTML = '';
+  libEl.innerHTML = '';
   if (state.reusables.length === 0) {
-    libraryListEl.innerHTML = '<div class="editor-empty">Noch keine Artikel. Unten hinzufügen.</div>';
+    libEl.innerHTML = '<div class="editor-empty">Noch keine Artikel. Unten hinzufügen.</div>';
   } else {
     state.reusables.forEach(item => {
       const inActive = state.active.includes(item.id);
@@ -632,13 +658,13 @@ function renderEditor() {
           <button class="icon-btn ${inActive ? 'active' : ''}" data-toggle>${inActive ? '✓' : '+'}</button>
           <button class="icon-btn danger" data-delete>×</button>
         </div>`;
-      row.querySelector('[data-toggle]').addEventListener('click', () => {
+      row.querySelector('[data-toggle]')?.addEventListener('click', () => {
         if (inActive) state.active = state.active.filter(x => x !== item.id);
         else state.active.push(item.id);
         save(KEYS.active, state.active);
         renderEditor();
       });
-      row.querySelector('[data-delete]').addEventListener('click', () => {
+      row.querySelector('[data-delete]')?.addEventListener('click', () => {
         confirmModal('Artikel löschen?', `"${item.name}" wird aus der Bibliothek entfernt.`, () => {
           state.reusables = state.reusables.filter(r => r.id !== item.id);
           state.active = state.active.filter(x => x !== item.id);
@@ -646,34 +672,35 @@ function renderEditor() {
           renderEditor();
         });
       });
-      libraryListEl.appendChild(row);
+      libEl.appendChild(row);
     });
   }
 }
 
-document.getElementById('addForm').addEventListener('submit', e => {
+byId('addForm').addEventListener('submit', e => {
   e.preventDefault();
-  const name = document.getElementById('newName').value.trim();
-  const price = parseEur(document.getElementById('newPrice').value);
+  const nameEl = /** @type {HTMLInputElement} */ (byId('newName'));
+  const priceEl = /** @type {HTMLInputElement} */ (byId('newPrice'));
+  const name = nameEl.value.trim();
+  const price = parseEur(priceEl.value);
   if (!name || isNaN(price) || price < 0) return;
   state.reusables.push({ id: uid(), name, price });
   save(KEYS.reusables, state.reusables);
-  document.getElementById('newName').value = '';
-  document.getElementById('newPrice').value = '';
+  nameEl.value = '';
+  priceEl.value = '';
   renderEditor();
 });
 
 // ---- Summary ----
 function renderSummary() {
   const total = state.orders.reduce((s, o) => s + o.total, 0);
-  document.getElementById('dayTotal').textContent = fmt(total);
-  document.getElementById('orderCount').textContent = state.orders.length;
+  byId('dayTotal').textContent = fmt(total);
+  byId('orderCount').textContent = String(state.orders.length);
 
-  const list = document.getElementById('orderList');
+  const list = byId('orderList');
   list.innerHTML = '';
   [...state.orders].reverse().forEach(o => {
-    const t = new Date(o.time);
-    const time = t.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+    const time = formatTime(o.time);
     const row = document.createElement('div');
     row.className = 'order-row';
     const itemsText = o.items.map(i => `${i.qty}× ${i.name}`).join(', ');
@@ -684,8 +711,13 @@ function renderSummary() {
   });
 }
 
-document.getElementById('exportCsv').addEventListener('click', exportCsv);
-document.getElementById('clearDay').addEventListener('click', () => {
+/** @param {string} iso */
+function formatTime(iso) {
+  return new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+}
+
+byId('exportCsv').addEventListener('click', exportCsv);
+byId('clearDay').addEventListener('click', () => {
   if (state.orders.length === 0 && state.active.length === 0) return;
   confirmModal('Tag zurücksetzen?', 'Alle Bestellungen und das aktive Menü werden gelöscht. Die Bibliothek bleibt erhalten.', () => {
     state.orders = [];
@@ -699,11 +731,11 @@ document.getElementById('clearDay').addEventListener('click', () => {
 function exportCsv() {
   // Semicolon-separated for EU locale Excel/Numbers
   const sep = ';';
+  /** @type {(string | number)[][]} */
   const rows = [['Zeit', 'Artikel', 'Anzahl', 'Einzelpreis', 'Zwischensumme']];
   let dayTotal = 0;
   state.orders.forEach(o => {
-    const t = new Date(o.time);
-    const time = t.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+    const time = formatTime(o.time);
     o.items.forEach(i => {
       rows.push([time, i.name, i.qty, csvNum(i.price), csvNum(i.price * i.qty)]);
     });
@@ -725,7 +757,10 @@ function exportCsv() {
   URL.revokeObjectURL(url);
 }
 
+/** @param {number} n */
 function csvNum(n) { return n.toFixed(2).replace('.', ','); }
+
+/** @param {string | number} v */
 function csvCell(v) {
   const s = String(v);
   if (/[";\r\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
@@ -733,24 +768,29 @@ function csvCell(v) {
 }
 
 // ---- Modal ----
-const modalEl = document.getElementById('modal');
+/** @type {(() => void) | null} */
 let modalCb = null;
+
+/** @param {string} title @param {string} text @param {() => void} cb */
 function confirmModal(title, text, cb) {
-  document.getElementById('modalTitle').textContent = title;
-  document.getElementById('modalText').textContent = text;
+  byId('modalTitle').textContent = title;
+  byId('modalText').textContent = text;
   modalCb = cb;
-  modalEl.classList.add('active');
+  byId('modal').classList.add('active');
 }
-document.getElementById('modalCancel').addEventListener('click', () => {
-  modalEl.classList.remove('active'); modalCb = null;
-});
-document.getElementById('modalConfirm').addEventListener('click', () => {
-  modalEl.classList.remove('active');
-  if (modalCb) modalCb();
+byId('modalCancel').addEventListener('click', () => {
+  byId('modal').classList.remove('active');
   modalCb = null;
+});
+byId('modalConfirm').addEventListener('click', () => {
+  byId('modal').classList.remove('active');
+  const cb = modalCb;
+  modalCb = null;
+  if (cb) cb();
 });
 
 // ---- Helpers ----
+/** @param {string} s */
 function escapeHtml(s) {
   return String(s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
