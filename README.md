@@ -1,37 +1,37 @@
 # Vereinskasse
 
-A single-file cash register web app for sports club events. Runs in Safari on iPad/iPhone, works fully offline, no install or accounts required.
+Eine Kassen-App als einzelne HTML-Datei für Vereinsveranstaltungen. Läuft in Safari auf iPad/iPhone, funktioniert komplett offline, ohne Installation und ohne Konto.
 
-## Use it
+## Verwendung
 
-1. Open `index.html` in Safari (or any modern browser).
-2. On iPad/iPhone: tap **Share → Zum Home-Bildschirm** to install it as a full-screen app.
-3. That's it. No build, no server, no internet required after the first load.
+1. `index.html` in Safari öffnen (oder in einem beliebigen modernen Browser).
+2. Auf iPad/iPhone: **Teilen → Zum Home-Bildschirm** tippen, um die App im Vollbild zu installieren.
+3. Fertig. Kein Build, kein Server, nach dem ersten Laden auch kein Internet nötig.
 
-## Features
+## Funktionen
 
-- **Kasse** – tap-grid of menu items, cart with quantity controls, payment screen with cash input, change calculation, and quick-cash buttons (next round-up + 5/10/20/50 €).
-- **Menü** – two-list editor: a persistent **library** of items you ever sell, and an **active menu** for the current event. Add, delete, and toggle items into today's menu.
-- **Tag** – day total, list of all orders, **CSV export** (semicolon-separated, UTF-8 BOM, comma decimals — opens cleanly in Numbers/Excel DE), and a **reset day** action that clears orders + active menu but keeps the library.
+- **Kasse** – Tipp-Raster mit Menüartikeln, Warenkorb mit Mengen-Steuerung, Zahlungsbildschirm mit Bareingabe, automatischer Wechselgeld-Berechnung und Schnellauswahl-Knöpfen (nächste Aufrundung + 5/10/20/50 €).
+- **Menü** – Zwei-Listen-Editor: eine dauerhafte **Bibliothek** aller Artikel, die du je verkaufst, und ein **aktives Menü** für die aktuelle Veranstaltung. Artikel hinzufügen, löschen und ins heutige Menü übernehmen.
+- **Tag** – Tagesumsatz, Liste aller Bestellungen, **CSV-Export** (Semikolon-getrennt, UTF-8 BOM, Komma als Dezimaltrenner — öffnet sauber in Numbers/Excel) und ein **Tag zurücksetzen**, das Bestellungen + aktives Menü löscht, die Bibliothek aber behält.
 
-## Data
+## Daten
 
-Everything lives in `localStorage`:
+Alles liegt im `localStorage`:
 
-| Key | Content | Persists across reset? |
+| Schlüssel | Inhalt | Bleibt nach Tag-Reset? |
 | --- | --- | --- |
-| `club-register-reusables` | Item library | yes |
-| `club-register-active` | Today's active menu | no |
-| `club-register-orders` | Today's orders | no |
+| `club-register-reusables` | Artikel-Bibliothek | ja |
+| `club-register-active` | Heutiges aktives Menü | nein |
+| `club-register-orders` | Heutige Bestellungen | nein |
 
-The library is the only thing meant to outlive an event. Reset Day wipes orders and the active menu together.
+Nur die Bibliothek soll eine Veranstaltung überdauern. „Tag zurücksetzen" leert Bestellungen und aktives Menü gemeinsam.
 
-## Tech
+## Technik
 
-- Plain HTML + CSS + JavaScript in one file. No build, no dependencies.
-- `// @ts-check` + JSDoc types for editor type-checking without a build step.
-- Locale: German UI labels, EUR with `,` as the decimal separator.
+- Reines HTML + CSS + JavaScript in einer Datei. Kein Build, keine Abhängigkeiten.
+- `// @ts-check` + JSDoc-Typen für Typprüfung im Editor — ohne Build-Schritt.
+- Sprache: Deutsche UI-Beschriftungen, EUR mit `,` als Dezimaltrenner.
 
-## Out of scope
+## Nicht enthalten
 
-Card payments, receipts, multi-device sync, tax/invoice compliance, accounts.
+Kartenzahlung, Belege, Geräte-Synchronisation, Steuer-/Rechnungs-Konformität, Benutzerkonten.
