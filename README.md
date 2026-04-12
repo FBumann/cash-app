@@ -29,3 +29,7 @@ Im Tab **Menü → Sicherung** kannst du die Bibliothek als Datei herunterladen 
 - ❌ Nicht das App-Symbol löschen — sonst sind alle Daten weg.
 - ❌ Nicht in Safari „Verlauf und Websitedaten löschen" — gleiches Problem.
 - ❌ Keine Synchronisation zwischen Geräten. Jedes Gerät hat seine eigene Kasse.
+
+## Für Entwickler
+
+Eine einzige `index.html` plus `sw.js` (Service Worker für Offline). Reines HTML/CSS/JavaScript. Kein Build, keine Abhängigkeiten. `// @ts-check` + JSDoc für Typprüfung im Editor. Daten in `localStorage`. CSV-Export per `Blob`-Download. Sprache: Deutsch, EUR mit `,` als Dezimaltrenner.
