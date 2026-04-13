@@ -919,7 +919,7 @@ function renderEditor() {
         </button>
         <div class="actions">
           <button class="icon-btn ${inActive ? 'active' : ''}" data-toggle>${inActive ? '✓' : '+'}</button>
-          <button class="icon-btn danger" data-delete>×</button>
+          <button class="icon-btn danger" data-delete><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
         </div>`;
       row.querySelector('[data-edit]')?.addEventListener('click', () => {
         editItemModal(item, (name, price, color) => {
@@ -1101,7 +1101,7 @@ function renderSummary() {
         <span>${time}</span>
         <span class="order-right">
           <span>${fmt(o.total)}</span>
-          <button class="icon-btn danger" data-delete aria-label="Bestellung löschen">×</button>
+          <button class="icon-btn danger" data-delete aria-label="Bestellung löschen"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
         </span>
       </div>
       <div class="items">${escapeHtml(itemsText)}</div>`;
