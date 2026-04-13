@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - index.html
+      - .github/workflows/release.yml
 
 jobs:
   tag:
@@ -36,6 +37,29 @@ jobs:
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Build release notes from commit messages
+        if: steps.check.outputs.exists == 'false'
+        id: notes
+        run: |
+          prev=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || true)
+          if [ -n "$prev" ]; then
+            range="$prev..HEAD"
+            header="### Änderungen seit $prev"
+          else
+            range=""
+            header="### Änderungen"
+          fi
+          {
+            echo "$header"
+            echo
+            git log $range --pretty=format:"- %s (%h)" --no-merges
+            echo
+            if [ -n "$prev" ]; then
+              echo
+              echo "**Full Changelog:** https://github.com/${{ github.repository }}/compare/$prev...${{ steps.ver.outputs.tag }}"
+            fi
+          } > release-notes.md
+
       - name: Create tag and GitHub release
         if: steps.check.outputs.exists == 'false'
         env:
@@ -45,4 +69,4 @@ jobs:
           git push origin "${{ steps.ver.outputs.tag }}"
           gh release create "${{ steps.ver.outputs.tag }}" \
             --title "${{ steps.ver.outputs.tag }}" \
-            --generate-notes
+            --notes-file release-notes.md
