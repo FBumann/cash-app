@@ -94,6 +94,14 @@
   }
   .menu-item .name { font-size: 17px; font-weight: 600; }
   .menu-item .price { font-size: 15px; color: inherit; opacity: 0.75; }
+  .menu-item--custom {
+    background: transparent;
+    color: var(--accent);
+    border: 2px dashed var(--accent);
+  }
+  .menu-item--custom:active {
+    background: var(--accent); color: white;
+  }
   .menu-empty {
     grid-column: 1 / -1; text-align: center;
     color: var(--muted); padding: 40px 20px;
@@ -443,6 +451,7 @@
     <h3 id="modalTitle"></h3>
     <p id="modalText"></p>
     <div class="modal-palette" id="modalPalette" hidden></div>
+    <input class="input-cash" id="modalInput" type="text" inputmode="decimal" placeholder="0,00" hidden>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="modalCancel">Abbrechen</button>
       <button class="btn btn-danger" id="modalConfirm">Bestätigen</button>
@@ -562,27 +571,49 @@ function showTab(tab) {
 function renderRegister() {
   const grid = byId('menuGrid');
   grid.innerHTML = '';
+
+  state.active.forEach(id => {
+    const item = state.reusables.find(r => r.id === id);
+    if (!item) return;
+    const btn = document.createElement('button');
+    btn.className = 'menu-item';
+    if (item.color) {
+      btn.style.setProperty('--menu-bg', item.color);
+      btn.style.setProperty('--menu-fg', 'white');
+    }
+    btn.innerHTML = `<div class="name">${escapeHtml(item.name)}</div><div class="price">${fmt(item.price)}</div>`;
+    btn.addEventListener('click', () => addToCart(item));
+    grid.appendChild(btn);
+  });
+
   if (state.active.length === 0) {
     const empty = document.createElement('div');
     empty.className = 'menu-empty';
     empty.textContent = 'Kein aktives Menü. Im Tab "Menü" Artikel hinzufügen.';
     grid.appendChild(empty);
-  } else {
-    state.active.forEach(id => {
-      const item = state.reusables.find(r => r.id === id);
-      if (!item) return;
-      const btn = document.createElement('button');
-      btn.className = 'menu-item';
-      if (item.color) {
-        btn.style.setProperty('--menu-bg', item.color);
-        btn.style.setProperty('--menu-fg', 'white');
-      }
-      btn.innerHTML = `<div class="name">${escapeHtml(item.name)}</div><div class="price">${fmt(item.price)}</div>`;
-      btn.addEventListener('click', () => addToCart(item));
-      grid.appendChild(btn);
-    });
   }
+
+  // Custom amount tile — always last, always available
+  const customBtn = document.createElement('button');
+  customBtn.className = 'menu-item menu-item--custom';
+  customBtn.innerHTML = '<div class="name">+ Sonstiges</div><div class="price">Freier Betrag</div>';
+  customBtn.addEventListener('click', openCustomAmount);
+  grid.appendChild(customBtn);
+
   renderCart();
+}
+
+function openCustomAmount() {
+  priceInputModal('Freier Betrag', price => {
+    state.cart.push({
+      id: 'custom-' + uid(),
+      name: 'Sonstiges',
+      price,
+      color: '',
+      qty: 1,
+    });
+    renderCart();
+  });
 }
 
 /** @param {MenuItem} item */
@@ -947,7 +978,11 @@ let modalCb = null;
 function closeModal() {
   byId('modal').classList.remove('active');
   byId('modalPalette').hidden = true;
-  /** @type {HTMLElement} */ (byId('modalConfirm')).hidden = false;
+  /** @type {HTMLInputElement} */ (byId('modalInput')).hidden = true;
+  const confirmBtn = /** @type {HTMLElement} */ (byId('modalConfirm'));
+  confirmBtn.hidden = false;
+  confirmBtn.classList.remove('btn-primary');
+  confirmBtn.classList.add('btn-danger');
   modalCb = null;
 }
 
@@ -956,7 +991,11 @@ function confirmModal(title, text, cb) {
   byId('modalTitle').textContent = title;
   byId('modalText').textContent = text;
   byId('modalPalette').hidden = true;
-  /** @type {HTMLElement} */ (byId('modalConfirm')).hidden = false;
+  /** @type {HTMLInputElement} */ (byId('modalInput')).hidden = true;
+  const confirmBtn = /** @type {HTMLElement} */ (byId('modalConfirm'));
+  confirmBtn.hidden = false;
+  confirmBtn.classList.remove('btn-primary');
+  confirmBtn.classList.add('btn-danger');
   modalCb = cb;
   byId('modal').classList.add('active');
 }
@@ -965,6 +1004,7 @@ function confirmModal(title, text, cb) {
 function colorPickerModal(current, cb) {
   byId('modalTitle').textContent = 'Farbe wählen';
   byId('modalText').textContent = '';
+  /** @type {HTMLInputElement} */ (byId('modalInput')).hidden = true;
   const palette = byId('modalPalette');
   palette.hidden = false;
   palette.innerHTML = '';
@@ -984,6 +1024,26 @@ function colorPickerModal(current, cb) {
   /** @type {HTMLElement} */ (byId('modalConfirm')).hidden = true;
   modalCb = null;
   byId('modal').classList.add('active');
+}
+
+/** @param {string} title @param {(price: number) => void} cb */
+function priceInputModal(title, cb) {
+  byId('modalTitle').textContent = title;
+  byId('modalText').textContent = '';
+  byId('modalPalette').hidden = true;
+  const input = /** @type {HTMLInputElement} */ (byId('modalInput'));
+  input.hidden = false;
+  input.value = '';
+  const confirmBtn = /** @type {HTMLElement} */ (byId('modalConfirm'));
+  confirmBtn.hidden = false;
+  confirmBtn.classList.remove('btn-danger');
+  confirmBtn.classList.add('btn-primary');
+  modalCb = () => {
+    const price = parseEur(input.value);
+    if (!isNaN(price) && price > 0) cb(price);
+  };
+  byId('modal').classList.add('active');
+  setTimeout(() => input.focus(), 50);
 }
 
 byId('modalCancel').addEventListener('click', closeModal);
