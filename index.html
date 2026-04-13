@@ -512,7 +512,7 @@
  */
 
 /** Single source of truth for the app version. Must match sw.js CACHE. */
-const APP_VERSION = '15';
+const APP_VERSION = '16';
 
 /** Fixed palette for menu item colors. Empty string = default (no color). */
 const COLORS = [
@@ -592,16 +592,16 @@ function parseEur(str) {
 }
 
 /**
- * Strict price validation: a number with at most 2 decimal places.
- * Accepts negative, zero, and positive values. `,` or `.` as separator.
+ * Price validation: any valid number. Accepts negative, zero, and
+ * positive values. `,` or `.` as decimal separator.
  * @param {string} str
  * @returns {{ ok: true, value: number } | { ok: false, error: string }}
  */
 function validatePrice(str) {
   const cleaned = String(str ?? '').trim().replace(/\s|€/g, '');
   if (!cleaned) return { ok: false, error: 'Preis fehlt' };
-  if (!/^-?\d+(?:[,.]\d{1,2})?$/.test(cleaned)) {
-    return { ok: false, error: 'Ungültiger Preis (höchstens 2 Nachkommastellen)' };
+  if (!/^-?\d+(?:[,.]\d+)?$/.test(cleaned)) {
+    return { ok: false, error: 'Ungültiger Preis' };
   }
   return { ok: true, value: parseFloat(cleaned.replace(',', '.')) };
 }
