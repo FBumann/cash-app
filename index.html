@@ -317,6 +317,10 @@
     margin: 4px 0 20px 0; padding: 0;
     text-align: center; color: var(--muted); font-size: 12px;
   }
+  .form-error {
+    margin: 0; padding: 4px 2px 0 2px;
+    color: var(--danger); font-size: 13px; line-height: 1.3;
+  }
 
   /* Summary */
   #summary { padding: 12px; }
@@ -443,10 +447,11 @@
         <form class="add-form" id="addForm">
           <div class="palette-row" id="newColor"></div>
           <div class="add-form-inputs">
-            <input class="name" id="newName" type="text" placeholder="Name" required>
-            <input class="price" id="newPrice" type="text" inputmode="decimal" placeholder="0,00" required>
+            <input class="name" id="newName" type="text" placeholder="Name">
+            <input class="price" id="newPrice" type="text" inputmode="decimal" placeholder="0,00">
             <button type="submit">+</button>
           </div>
+          <p class="form-error" id="addFormError" hidden></p>
         </form>
       </div>
       <div class="editor-section">
@@ -487,6 +492,7 @@
       <input class="modal-form-input" id="modalEditPrice" type="text" inputmode="decimal" placeholder="0,00">
     </div>
     <input class="input-cash" id="modalInput" type="text" inputmode="decimal" placeholder="0,00" hidden>
+    <p class="form-error" id="modalError" hidden></p>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="modalCancel">Abbrechen</button>
       <button class="btn btn-danger" id="modalConfirm">Bestätigen</button>
@@ -506,7 +512,7 @@
  */
 
 /** Single source of truth for the app version. Must match sw.js CACHE. */
-const APP_VERSION = '14';
+const APP_VERSION = '15';
 
 /** Fixed palette for menu item colors. Empty string = default (no color). */
 const COLORS = [
@@ -583,6 +589,32 @@ function parseEur(str) {
   if (!str) return NaN;
   const cleaned = String(str).replace(/\s|€/g, '').replace(',', '.');
   return parseFloat(cleaned);
+}
+
+/**
+ * Strict price validation: a number with at most 2 decimal places.
+ * Accepts negative, zero, and positive values. `,` or `.` as separator.
+ * @param {string} str
+ * @returns {{ ok: true, value: number } | { ok: false, error: string }}
+ */
+function validatePrice(str) {
+  const cleaned = String(str ?? '').trim().replace(/\s|€/g, '');
+  if (!cleaned) return { ok: false, error: 'Preis fehlt' };
+  if (!/^-?\d+(?:[,.]\d{1,2})?$/.test(cleaned)) {
+    return { ok: false, error: 'Ungültiger Preis (höchstens 2 Nachkommastellen)' };
+  }
+  return { ok: true, value: parseFloat(cleaned.replace(',', '.')) };
+}
+
+/**
+ * Name validation: non-empty after trimming.
+ * @param {string} str
+ * @returns {{ ok: true, value: string } | { ok: false, error: string }}
+ */
+function validateName(str) {
+  const trimmed = String(str ?? '').trim();
+  if (!trimmed) return { ok: false, error: 'Name fehlt' };
+  return { ok: true, value: trimmed };
 }
 
 // ---- Tabs ----
@@ -882,14 +914,24 @@ byId('addForm').addEventListener('submit', e => {
   e.preventDefault();
   const nameEl = /** @type {HTMLInputElement} */ (byId('newName'));
   const priceEl = /** @type {HTMLInputElement} */ (byId('newPrice'));
-  const name = nameEl.value.trim();
-  const price = parseEur(priceEl.value);
-  if (!name || isNaN(price) || price < 0) return;
-  state.reusables.push({ id: uid(), name, price, color: newItemColor });
+  const errEl = byId('addFormError');
+
+  const showErr = /** @param {string} msg */ msg => {
+    errEl.textContent = msg;
+    errEl.hidden = false;
+  };
+
+  const n = validateName(nameEl.value);
+  if (!n.ok) { showErr(n.error); return; }
+  const p = validatePrice(priceEl.value);
+  if (!p.ok) { showErr(p.error); return; }
+
+  state.reusables.push({ id: uid(), name: n.value, price: p.value, color: newItemColor });
   save(KEYS.reusables, state.reusables);
   nameEl.value = '';
   priceEl.value = '';
   newItemColor = '';
+  errEl.hidden = true;
   renderEditor();
 });
 
@@ -1096,7 +1138,7 @@ function csvCell(v) {
 }
 
 // ---- Modal ----
-/** @type {(() => void) | null} */
+/** @type {(() => void | false) | null} */
 let modalCb = null;
 
 /**
@@ -1109,11 +1151,24 @@ function resetModal() {
   byId('modalPalette').hidden = true;
   byId('modalForm').hidden = true;
   /** @type {HTMLInputElement} */ (byId('modalInput')).hidden = true;
+  clearModalError();
   const confirmBtn = /** @type {HTMLElement} */ (byId('modalConfirm'));
   confirmBtn.hidden = false;
   confirmBtn.classList.remove('btn-primary');
   confirmBtn.classList.add('btn-danger');
   modalCb = null;
+}
+
+/** @param {string} msg */
+function showModalError(msg) {
+  const el = byId('modalError');
+  el.textContent = msg;
+  el.hidden = false;
+}
+function clearModalError() {
+  const el = byId('modalError');
+  el.textContent = '';
+  el.hidden = true;
 }
 
 function closeModal() {
@@ -1146,8 +1201,10 @@ function priceInputModal(title, cb) {
   input.value = '';
   useSaveButton();
   modalCb = () => {
-    const price = parseEur(input.value);
-    if (!isNaN(price) && price > 0) cb(price);
+    clearModalError();
+    const v = validatePrice(input.value);
+    if (!v.ok) { showModalError(v.error); return false; }
+    cb(v.value);
   };
   byId('modal').classList.add('active');
   setTimeout(() => input.focus(), 50);
@@ -1190,10 +1247,12 @@ function editItemModal(item, cb) {
 
   useSaveButton();
   modalCb = () => {
-    const name = nameIn.value.trim();
-    const price = parseEur(priceIn.value);
-    if (!name || isNaN(price) || price < 0) return;
-    cb(name, price, pickedColor);
+    clearModalError();
+    const n = validateName(nameIn.value);
+    if (!n.ok) { showModalError(n.error); return false; }
+    const p = validatePrice(priceIn.value);
+    if (!p.ok) { showModalError(p.error); return false; }
+    cb(n.value, p.value, pickedColor);
   };
   byId('modal').classList.add('active');
   setTimeout(() => nameIn.focus(), 50);
@@ -1201,9 +1260,10 @@ function editItemModal(item, cb) {
 
 byId('modalCancel').addEventListener('click', closeModal);
 byId('modalConfirm').addEventListener('click', () => {
-  const cb = modalCb;
-  closeModal();
-  if (cb) cb();
+  if (!modalCb) { closeModal(); return; }
+  // A callback may return `false` to abort close (e.g. validation failed).
+  const keepOpen = modalCb() === false;
+  if (!keepOpen) closeModal();
 });
 
 // ---- Helpers ----
