@@ -90,11 +90,17 @@
     display: flex; flex-direction: column; justify-content: center;
     align-items: center; gap: 6px; text-align: center;
   }
+  /* Shadow only on colored buttons — edit in one place to tune. */
+  .menu-item--colored {
+    text-shadow:
+      0 0 3px rgba(0, 0, 0, 0.7),
+      0 2px 4px rgba(0, 0, 0, 0.8);
+  }
   .menu-item:active {
     background: var(--accent); color: white; border-color: var(--accent);
   }
   .menu-item .name { font-size: 17px; font-weight: 600; }
-  .menu-item .price { font-size: 15px; color: inherit; opacity: 0.75; }
+  .menu-item .price { font-size: 15px; color: inherit; opacity: 0.9; }
   .menu-item--custom {
     background: transparent;
     color: var(--accent);
@@ -512,20 +518,20 @@
  */
 
 /** Single source of truth for the app version. Must match sw.js CACHE. */
-const APP_VERSION = '16';
+const APP_VERSION = '18';
 
 /** Fixed palette for menu item colors. Empty string = default (no color). */
 const COLORS = [
   { name: 'Standard', value: '' },
-  { name: 'Rose',     value: '#e11d48' },
-  { name: 'Orange',   value: '#ea580c' },
-  { name: 'Amber',    value: '#d97706' },
-  { name: 'Lime',     value: '#65a30d' },
-  { name: 'Emerald',  value: '#059669' },
-  { name: 'Cyan',     value: '#0891b2' },
-  { name: 'Blue',     value: '#2563eb' },
-  { name: 'Violet',   value: '#7c3aed' },
-  { name: 'Pink',     value: '#db2777' },
+  { name: 'Rose',     value: '#f43f5e' },
+  { name: 'Orange',   value: '#f97316' },
+  { name: 'Amber',    value: '#f59e0b' },
+  { name: 'Lime',     value: '#84cc16' },
+  { name: 'Emerald',  value: '#10b981' },
+  { name: 'Cyan',     value: '#06b6d4' },
+  { name: 'Blue',     value: '#3b82f6' },
+  { name: 'Violet',   value: '#8b5cf6' },
+  { name: 'Pink',     value: '#ec4899' },
 ];
 
 /**
@@ -648,6 +654,7 @@ function renderRegister() {
     const btn = document.createElement('button');
     btn.className = 'menu-item';
     if (item.color) {
+      btn.classList.add('menu-item--colored');
       btn.style.setProperty('--menu-bg', item.color);
       btn.style.setProperty('--menu-fg', 'white');
     }
