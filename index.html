@@ -9,16 +9,16 @@
 <title>Vereinskasse</title>
 <style>
   :root {
-    --bg: #0f1115;
-    --surface: #1a1d24;
-    --surface-2: #262a33;
-    --border: #333845;
-    --text: #f0f2f5;
-    --muted: #8a92a3;
-    --accent: #4f9eff;
-    --accent-press: #3a86e8;
-    --success: #4ade80;
-    --danger: #ef4444;
+    --bg: #f5f5f5;
+    --surface: #ffffff;
+    --surface-2: #e9e9eb;
+    --border: #d1d1d6;
+    --text: #1c1c1e;
+    --muted: #6e6e73;
+    --accent: #0071e3;
+    --accent-press: #0062c4;
+    --success: #28a745;
+    --danger: #dc3545;
     --warning: #f59e0b;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -74,21 +74,26 @@
     display: grid; gap: 10px;
     grid-template-columns: repeat(2, 1fr);
     align-content: start;
+    min-height: 0;
+    -webkit-overflow-scrolling: touch;
   }
   @media (min-width: 768px) {
     .menu-grid { grid-template-columns: repeat(3, 1fr); }
   }
   .menu-item {
-    background: var(--surface-2); border: 1px solid var(--border);
+    background: var(--menu-bg, var(--surface-2));
+    color: var(--menu-fg, var(--text));
+    border: 1px solid var(--border);
     border-radius: 12px; padding: 16px 10px;
     min-height: 88px;
     display: flex; flex-direction: column; justify-content: center;
     align-items: center; gap: 6px; text-align: center;
   }
-  .menu-item:active { background: var(--accent); border-color: var(--accent); }
+  .menu-item:active {
+    background: var(--accent); color: white; border-color: var(--accent);
+  }
   .menu-item .name { font-size: 17px; font-weight: 600; }
-  .menu-item .price { font-size: 15px; color: var(--muted); }
-  .menu-item:active .price { color: rgba(255,255,255,0.85); }
+  .menu-item .price { font-size: 15px; color: inherit; opacity: 0.75; }
   .menu-empty {
     grid-column: 1 / -1; text-align: center;
     color: var(--muted); padding: 40px 20px;
@@ -100,6 +105,7 @@
     border-top: 1px solid var(--border);
     display: flex; flex-direction: column;
     max-height: 50vh;
+    overflow: hidden;
   }
   @media (min-width: 768px) {
     .cart {
@@ -107,7 +113,11 @@
       width: 360px; max-height: none;
     }
   }
-  .cart-items { flex: 1; overflow-y: auto; padding: 8px 12px; }
+  .cart-items {
+    flex: 1; overflow-y: auto; padding: 8px 12px;
+    min-height: 0;
+    -webkit-overflow-scrolling: touch;
+  }
   .cart-item {
     display: flex; align-items: center; gap: 10px;
     padding: 10px 0; border-bottom: 1px solid var(--border);
@@ -158,6 +168,8 @@
     flex: 1; overflow-y: auto;
     padding: 20px; max-width: 480px; width: 100%;
     margin: 0 auto;
+    min-height: 0;
+    -webkit-overflow-scrolling: touch;
   }
   .pay-row {
     display: flex; justify-content: space-between; align-items: baseline;
@@ -194,7 +206,11 @@
   }
 
   /* Menu editor */
-  #editor { padding: 12px; overflow-y: auto; }
+  #editor {
+    padding: 12px; overflow-y: auto;
+    min-height: 0;
+    -webkit-overflow-scrolling: touch;
+  }
   .editor-section {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: 12px; margin-bottom: 14px;
@@ -229,10 +245,12 @@
   .editor-empty { padding: 20px 16px; color: var(--muted); text-align: center; font-size: 14px; }
 
   .add-form {
-    display: flex; gap: 8px; padding: 12px 16px;
+    display: flex; flex-direction: column; gap: 10px;
+    padding: 12px 16px;
     border-top: 1px solid var(--border);
     background: var(--surface-2);
   }
+  .add-form-inputs { display: flex; gap: 8px; }
   .add-form input {
     background: var(--bg); border: 1px solid var(--border);
     border-radius: 8px; padding: 12px;
@@ -245,6 +263,35 @@
     border-radius: 8px; padding: 0 16px; font-size: 16px;
     font-weight: 600; min-height: 48px; min-width: 56px;
   }
+  .palette-row {
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .swatch {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 2px solid var(--border);
+    padding: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 16px; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .swatch.selected { border-color: var(--text); border-width: 3px; }
+  .swatch.default {
+    background: var(--surface-2);
+    color: var(--muted);
+  }
+  .modal-palette {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    padding: 4px 0 16px 0;
+  }
+  .modal-palette .swatch { width: 44px; height: 44px; font-size: 18px; }
+  .color-dot {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    padding: 0; flex-shrink: 0; margin-right: 10px;
+    cursor: pointer;
+  }
+  span.color-dot { cursor: default; width: 20px; height: 20px; border-width: 1px; }
   .backup-actions {
     display: flex; flex-direction: column; gap: 8px;
     padding: 12px 16px;
@@ -256,7 +303,11 @@
   }
 
   /* Summary */
-  #summary { padding: 12px; overflow-y: auto; }
+  #summary {
+    padding: 12px; overflow-y: auto;
+    min-height: 0;
+    -webkit-overflow-scrolling: touch;
+  }
   .summary-card {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: 12px; padding: 18px; margin-bottom: 14px;
@@ -350,9 +401,12 @@
         <h3>Bibliothek</h3>
         <div class="editor-list" id="libraryList"></div>
         <form class="add-form" id="addForm">
-          <input class="name" id="newName" type="text" placeholder="Name" required>
-          <input class="price" id="newPrice" type="text" inputmode="decimal" placeholder="0,00" required>
-          <button type="submit">+</button>
+          <div class="palette-row" id="newColor"></div>
+          <div class="add-form-inputs">
+            <input class="name" id="newName" type="text" placeholder="Name" required>
+            <input class="price" id="newPrice" type="text" inputmode="decimal" placeholder="0,00" required>
+            <button type="submit">+</button>
+          </div>
         </form>
       </div>
       <div class="editor-section">
@@ -386,6 +440,7 @@
   <div class="modal">
     <h3 id="modalTitle"></h3>
     <p id="modalText"></p>
+    <div class="modal-palette" id="modalPalette" hidden></div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="modalCancel">Abbrechen</button>
       <button class="btn btn-danger" id="modalConfirm">Bestätigen</button>
@@ -398,11 +453,25 @@
 'use strict';
 
 /**
- * @typedef {{ id: string, name: string, price: number }} MenuItem
+ * @typedef {{ id: string, name: string, price: number, color: string }} MenuItem
  * @typedef {MenuItem & { qty: number }} CartLine
  * @typedef {{ name: string, price: number, qty: number }} OrderLine
  * @typedef {{ id: string, time: string, items: OrderLine[], total: number }} Order
  */
+
+/** Fixed palette for menu item colors. Empty string = default (no color). */
+const COLORS = [
+  { name: 'Standard', value: '' },
+  { name: 'Rose',     value: '#be123c' },
+  { name: 'Orange',   value: '#c2410c' },
+  { name: 'Amber',    value: '#b45309' },
+  { name: 'Lime',     value: '#4d7c0f' },
+  { name: 'Emerald',  value: '#047857' },
+  { name: 'Cyan',     value: '#0e7490' },
+  { name: 'Blue',     value: '#1d4ed8' },
+  { name: 'Violet',   value: '#6d28d9' },
+  { name: 'Pink',     value: '#9d174d' },
+];
 
 /**
  * Get element by id, asserting non-null. Throws loudly if the id is wrong —
@@ -436,11 +505,17 @@ function save(key, val) {
 }
 
 const state = {
-  /** @type {MenuItem[]} */ reusables: load(KEYS.reusables, /** @type {MenuItem[]} */ ([])),
+  /** @type {MenuItem[]} */ reusables: load(KEYS.reusables, /** @type {MenuItem[]} */ ([]))
+    .map(r => ({ ...r, color: typeof r.color === 'string' ? r.color : '' })),
   /** @type {string[]}   */ active:    load(KEYS.active,    /** @type {string[]}   */ ([])),
   /** @type {Order[]}    */ orders:    load(KEYS.orders,    /** @type {Order[]}    */ ([])),
   /** @type {CartLine[]} */ cart:      [],
 };
+// Persist migration of any items that had no color field.
+save(KEYS.reusables, state.reusables);
+
+/** State for the "new item" form in the editor. */
+let newItemColor = '';
 
 function saveAll() {
   save(KEYS.reusables, state.reusables);
@@ -496,6 +571,10 @@ function renderRegister() {
       if (!item) return;
       const btn = document.createElement('button');
       btn.className = 'menu-item';
+      if (item.color) {
+        btn.style.setProperty('--menu-bg', item.color);
+        btn.style.setProperty('--menu-fg', 'white');
+      }
       btn.innerHTML = `<div class="name">${escapeHtml(item.name)}</div><div class="price">${fmt(item.price)}</div>`;
       btn.addEventListener('click', () => addToCart(item));
       grid.appendChild(btn);
@@ -627,7 +706,26 @@ byId('confirmPay').addEventListener('click', () => {
 });
 
 // ---- Editor ----
+function renderNewColorPicker() {
+  const row = byId('newColor');
+  row.innerHTML = '';
+  COLORS.forEach(c => {
+    const swatch = document.createElement('button');
+    swatch.type = 'button';
+    swatch.className = 'swatch' + (c.value ? '' : ' default') + (c.value === newItemColor ? ' selected' : '');
+    if (c.value) swatch.style.background = c.value;
+    if (!c.value) swatch.textContent = '–';
+    swatch.title = c.name;
+    swatch.addEventListener('click', () => {
+      newItemColor = c.value;
+      renderNewColorPicker();
+    });
+    row.appendChild(swatch);
+  });
+}
+
 function renderEditor() {
+  renderNewColorPicker();
   const activeEl = byId('activeList');
   const libEl = byId('libraryList');
 
@@ -641,7 +739,9 @@ function renderEditor() {
       if (!item) return;
       const row = document.createElement('div');
       row.className = 'editor-row';
+      const dotStyle = item.color ? `background: ${item.color}` : '';
       row.innerHTML = `
+        <span class="color-dot" style="${dotStyle}"></span>
         <div class="info">
           <div class="name">${escapeHtml(item.name)}</div>
           <div class="price">${fmt(item.price)}</div>
@@ -667,7 +767,9 @@ function renderEditor() {
       const inActive = state.active.includes(item.id);
       const row = document.createElement('div');
       row.className = 'editor-row';
+      const dotStyle = item.color ? `background: ${item.color}` : '';
       row.innerHTML = `
+        <button class="color-dot" data-pickcolor style="${dotStyle}" aria-label="Farbe ändern"></button>
         <div class="info">
           <div class="name">${escapeHtml(item.name)}</div>
           <div class="price">${fmt(item.price)}</div>
@@ -676,6 +778,13 @@ function renderEditor() {
           <button class="icon-btn ${inActive ? 'active' : ''}" data-toggle>${inActive ? '✓' : '+'}</button>
           <button class="icon-btn danger" data-delete>×</button>
         </div>`;
+      row.querySelector('[data-pickcolor]')?.addEventListener('click', () => {
+        colorPickerModal(item.color, color => {
+          item.color = color;
+          save(KEYS.reusables, state.reusables);
+          renderEditor();
+        });
+      });
       row.querySelector('[data-toggle]')?.addEventListener('click', () => {
         if (inActive) state.active = state.active.filter(x => x !== item.id);
         else state.active.push(item.id);
@@ -702,10 +811,11 @@ byId('addForm').addEventListener('submit', e => {
   const name = nameEl.value.trim();
   const price = parseEur(priceEl.value);
   if (!name || isNaN(price) || price < 0) return;
-  state.reusables.push({ id: uid(), name, price });
+  state.reusables.push({ id: uid(), name, price, color: newItemColor });
   save(KEYS.reusables, state.reusables);
   nameEl.value = '';
   priceEl.value = '';
+  newItemColor = '';
   renderEditor();
 });
 
@@ -831,21 +941,52 @@ function csvCell(v) {
 /** @type {(() => void) | null} */
 let modalCb = null;
 
+function closeModal() {
+  byId('modal').classList.remove('active');
+  byId('modalPalette').hidden = true;
+  /** @type {HTMLElement} */ (byId('modalConfirm')).hidden = false;
+  modalCb = null;
+}
+
 /** @param {string} title @param {string} text @param {() => void} cb */
 function confirmModal(title, text, cb) {
   byId('modalTitle').textContent = title;
   byId('modalText').textContent = text;
+  byId('modalPalette').hidden = true;
+  /** @type {HTMLElement} */ (byId('modalConfirm')).hidden = false;
   modalCb = cb;
   byId('modal').classList.add('active');
 }
-byId('modalCancel').addEventListener('click', () => {
-  byId('modal').classList.remove('active');
+
+/** @param {string} current @param {(color: string) => void} cb */
+function colorPickerModal(current, cb) {
+  byId('modalTitle').textContent = 'Farbe wählen';
+  byId('modalText').textContent = '';
+  const palette = byId('modalPalette');
+  palette.hidden = false;
+  palette.innerHTML = '';
+  COLORS.forEach(c => {
+    const swatch = document.createElement('button');
+    swatch.type = 'button';
+    swatch.className = 'swatch' + (c.value ? '' : ' default') + (c.value === current ? ' selected' : '');
+    if (c.value) swatch.style.background = c.value;
+    if (!c.value) swatch.textContent = '–';
+    swatch.title = c.name;
+    swatch.addEventListener('click', () => {
+      closeModal();
+      cb(c.value);
+    });
+    palette.appendChild(swatch);
+  });
+  /** @type {HTMLElement} */ (byId('modalConfirm')).hidden = true;
   modalCb = null;
-});
+  byId('modal').classList.add('active');
+}
+
+byId('modalCancel').addEventListener('click', closeModal);
 byId('modalConfirm').addEventListener('click', () => {
-  byId('modal').classList.remove('active');
   const cb = modalCb;
-  modalCb = null;
+  closeModal();
   if (cb) cb();
 });
 
