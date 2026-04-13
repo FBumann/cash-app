@@ -426,13 +426,13 @@
         </form>
       </div>
       <div class="editor-section">
-        <h3>Sicherung</h3>
+        <h3>Vorlagen</h3>
         <div class="backup-actions">
-          <button class="btn btn-secondary" id="exportLib">Bibliothek exportieren</button>
-          <label class="btn btn-secondary" for="importLibFile">Bibliothek importieren</label>
+          <button class="btn btn-secondary" id="exportLib">Vorlage exportieren</button>
+          <label class="btn btn-secondary" for="importLibFile">Vorlage laden</label>
           <input type="file" id="importLibFile" accept="application/json,.json" hidden>
         </div>
-        <p class="hint">Lade die Bibliothek als Datei herunter, um sie als Sicherung aufzubewahren.</p>
+        <p class="hint">Speichert die komplette Bibliothek und das aktive Menü als Datei. Dient als Sicherung oder als fertige Vorlage für nächste Veranstaltungen.</p>
       </div>
     </section>
 
@@ -859,20 +859,66 @@ byId('addForm').addEventListener('submit', e => {
   renderEditor();
 });
 
-// ---- Bibliothek Backup ----
+// ---- Vorlagen (Export / Import) ----
+/**
+ * @typedef {{
+ *   version: 1,
+ *   reusables: MenuItem[],
+ *   active: string[]
+ * }} Template
+ */
+
 byId('exportLib').addEventListener('click', () => {
-  const json = JSON.stringify(state.reusables, null, 2);
+  /** @type {Template} */
+  const template = {
+    version: 1,
+    reusables: state.reusables,
+    active: state.active,
+  };
+  const json = JSON.stringify(template, null, 2);
   const blob = new Blob([json], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   const stamp = new Date().toISOString().slice(0, 10);
   a.href = url;
-  a.download = `bibliothek-${stamp}.json`;
+  a.download = `vorlage-${stamp}.json`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 });
+
+/**
+ * Parse an imported file. Accepts both the new template envelope
+ * ({version, reusables, active}) and the old flat-array format for
+ * backward compat with previously exported library files.
+ * @param {unknown} data
+ * @returns {{ reusables: MenuItem[], active: string[] } | null}
+ */
+function parseTemplate(data) {
+  const isMenuItem = /** @param {any} d */ d =>
+    d && typeof d.id === 'string' && typeof d.name === 'string' && typeof d.price === 'number';
+  if (Array.isArray(data) && data.every(isMenuItem)) {
+    return {
+      reusables: data.map(r => ({ ...r, color: typeof r.color === 'string' ? r.color : '' })),
+      active: [],
+    };
+  }
+  if (data && typeof data === 'object' && Array.isArray(/** @type {any} */ (data).reusables)) {
+    const obj = /** @type {any} */ (data);
+    if (!obj.reusables.every(isMenuItem)) return null;
+    const reusables = obj.reusables.map(/** @param {any} r */ r => ({
+      ...r,
+      color: typeof r.color === 'string' ? r.color : '',
+    }));
+    const ids = new Set(reusables.map(/** @param {MenuItem} r */ r => r.id));
+    const active = Array.isArray(obj.active)
+      ? obj.active.filter(/** @param {any} x */ x => typeof x === 'string' && ids.has(x))
+      : [];
+    return { reusables, active };
+  }
+  return null;
+}
 
 const importEl = /** @type {HTMLInputElement} */ (byId('importLibFile'));
 importEl.addEventListener('change', async () => {
@@ -880,17 +926,14 @@ importEl.addEventListener('change', async () => {
   if (!file) return;
   try {
     const text = await file.text();
-    const data = JSON.parse(text);
-    const valid = Array.isArray(data) && data.every(d =>
-      d && typeof d.id === 'string' && typeof d.name === 'string' && typeof d.price === 'number'
-    );
-    if (!valid) throw new Error('Format ungültig');
+    const parsed = parseTemplate(JSON.parse(text));
+    if (!parsed) throw new Error('Format ungültig');
     confirmModal(
-      'Bibliothek ersetzen?',
-      `${data.length} Artikel werden importiert. Die aktuelle Bibliothek und das aktive Menü werden ersetzt.`,
+      'Vorlage laden?',
+      `${parsed.reusables.length} Artikel · ${parsed.active.length} im aktiven Menü. Die aktuelle Bibliothek und das aktive Menü werden ersetzt.`,
       () => {
-        state.reusables = data;
-        state.active = [];
+        state.reusables = parsed.reusables;
+        state.active = parsed.active;
         saveAll();
         renderEditor();
       },
