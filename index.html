@@ -469,6 +469,13 @@
         </div>
         <p class="hint">Speichert die komplette Bibliothek und das aktive Menü als Datei. Dient als Sicherung oder als fertige Vorlage für nächste Veranstaltungen.</p>
       </div>
+      <div class="editor-section">
+        <h3>Zurücksetzen</h3>
+        <div class="backup-actions">
+          <button class="btn btn-danger" id="resetAll">Alle Daten löschen</button>
+        </div>
+        <p class="hint">Entfernt Bibliothek, aktives Menü und alle Bestellungen. Die App startet danach wie bei einer frischen Installation.</p>
+      </div>
       <p class="version-footer">cash-app: v<span id="appVersion"></span></p>
     </section>
 
@@ -518,7 +525,7 @@
  */
 
 /** Single source of truth for the app version. Must match sw.js CACHE. */
-const APP_VERSION = '21';
+const APP_VERSION = '22';
 
 /** Fixed palette for menu item colors. Empty string = default (no color). */
 const COLORS = [
@@ -552,6 +559,21 @@ const KEYS = {
   active: 'club-register-active',
   orders: 'club-register-orders',
 };
+
+/** Seed values for a fresh install so the user has something to play with. */
+/** @type {MenuItem[]} */
+const DEFAULT_REUSABLES = [
+  { id: 'default-bier',  name: 'Bier',      price: 2.5, color: '#f59e0b' },
+  { id: 'default-wurst', name: 'Bratwurst', price: 3,   color: '#84cc16' },
+  { id: 'default-cola',  name: 'Cola',      price: 1.5, color: '#e11d48' },
+];
+
+// First launch only: inject defaults if the reusables key has never been set.
+// An explicit `[]` (user cleared everything) is respected and not re-seeded.
+if (localStorage.getItem(KEYS.reusables) === null) {
+  localStorage.setItem(KEYS.reusables, JSON.stringify(DEFAULT_REUSABLES));
+  localStorage.setItem(KEYS.active, JSON.stringify(DEFAULT_REUSABLES.map(r => r.id)));
+}
 
 /** @template T @param {string} key @param {T} fallback @returns {T} */
 function load(key, fallback) {
@@ -1280,6 +1302,18 @@ function escapeHtml(s) {
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
+
+// ---- Zurücksetzen ----
+byId('resetAll').addEventListener('click', () => {
+  confirmModal(
+    'Alle Daten löschen?',
+    'Bibliothek, aktives Menü und Bestellungen werden entfernt. Dieser Schritt kann nicht rückgängig gemacht werden.',
+    () => {
+      Object.values(KEYS).forEach(k => localStorage.removeItem(k));
+      location.reload();
+    },
+  );
+});
 
 // ---- Service Worker (für Offline-Betrieb) ----
 if ('serviceWorker' in navigator) {
