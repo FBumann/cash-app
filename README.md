@@ -67,10 +67,30 @@ Wenn du wirklich eine neue Version willst:
 
 > **Tipp:** Updates nie kurz vor einer Veranstaltung. Und nicht vergessen: offene Bestellungen im Tab **Tag** gehen bei der Neuinstallation verloren — vorher CSV exportieren.
 
-*Die reinstallation von alten Versionen ist kompliziert. Macht nur ein update wenn ihr es braucht!*
+### Zurück auf eine ältere Version
+
+Falls eine neue Version Probleme macht, kannst du eine bestimmte alte Version installieren. Jede veröffentlichte Version liegt unter einer eigenen URL:
+
+```
+fbumann.github.io/cash-app/versions/v18/
+fbumann.github.io/cash-app/versions/v19/
+fbumann.github.io/cash-app/versions/v20/
+```
+
+Vorgehen: App-Symbol löschen → gewünschte Versions-URL in Safari öffnen → **Zum Home-Bildschirm**.
+
+> **Warnung:** Die Kasse speichert ihre Daten (Bibliothek, aktives Menü, Tag) in einem Bereich, den sich **alle Versionen teilen**. Eine ältere Version kennt neuere Felder (z. B. Artikel-Farben) nicht und entfernt sie beim Speichern. Beim Rollback also unbedingt **vorher die Bibliothek exportieren** — im Ernstfall kannst du die Farben und anderes später manuell wiederherstellen.
 
 ## Für Entwickler
 
 Eine einzige `index.html` plus `sw.js` (Service Worker für Offline). Reines HTML/CSS/JavaScript. Kein Build, keine Abhängigkeiten. `// @ts-check` + JSDoc für Typprüfung im Editor. Daten in `localStorage`. CSV-Export per `Blob`-Download. Sprache: Deutsch, EUR mit `,` als Dezimaltrenner.
 
 Lokale Vorschau: `npx serve -l 3000 . & open http://localhost:3000`
+
+### Release-Workflow
+
+Push auf `main` mit einer neuen `APP_VERSION` triggert `.github/workflows/release.yml`:
+
+1. Tag `vN` wird angelegt, GitHub Release mit Notes aus den Commit-Messages seit dem letzten Tag.
+2. `index.html` + `sw.js` werden auf den `gh-pages`-Branch deployed — einmal im Root (latest) und einmal nach `versions/vN/` (Rollback-Ziel).
+3. GitHub Pages serviert aus `gh-pages`, nicht aus `main`. `main` bleibt reiner Source-Code, alle veröffentlichten Artefakte leben in `gh-pages`.

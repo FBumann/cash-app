@@ -70,3 +70,41 @@ jobs:
           gh release create "${{ steps.ver.outputs.tag }}" \
             --title "${{ steps.ver.outputs.tag }}" \
             --notes-file release-notes.md
+
+      - name: Deploy to gh-pages branch
+        if: steps.check.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="${{ steps.ver.outputs.tag }}"
+          repo_url="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
+          tmp=$(mktemp -d)
+
+          # Clone gh-pages if it exists, otherwise init an orphan branch.
+          if git ls-remote --exit-code --heads "$repo_url" gh-pages >/dev/null 2>&1; then
+            git clone --branch gh-pages --single-branch "$repo_url" "$tmp"
+          else
+            git clone "$repo_url" "$tmp"
+            (
+              cd "$tmp"
+              git checkout --orphan gh-pages
+              git rm -rf . 2>/dev/null || true
+            )
+          fi
+
+          # Latest copy lives at the root of gh-pages.
+          cp index.html sw.js "$tmp/"
+          # Archive this version for rollback installs.
+          mkdir -p "$tmp/versions/$tag"
+          cp index.html sw.js "$tmp/versions/$tag/"
+
+          cd "$tmp"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "gh-pages already up to date"
+          else
+            git commit -m "Deploy $tag [skip ci]"
+            git push origin gh-pages
+          fi
