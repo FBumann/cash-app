@@ -6,7 +6,7 @@ Eine Kasse für Vereinsfeste. Läuft offline auf iPad/iPhone.
 
 ## Einrichten
 
-Einmal mit WLAN:
+Einmal mit Internetverbindung:
 
 1. In Safari `fbumann.github.io/cash-app` öffnen.
 2. Teilen-Symbol → **Zum Home-Bildschirm** → **Hinzufügen**.
@@ -41,7 +41,10 @@ Einmal mit WLAN:
 
 ## Sicherung
 
-Im Tab **Menü → Sicherung** kannst du die Bibliothek als Datei herunterladen und später wieder importieren. Mach das ab und zu — die Datei ist dein Backup.
+Die **angelegten Artikel werden als Bibliothek gespeichert**. Die angelegte Bibliothek kann **auf ein anderes Gerät übertragen** werden.
+Dafür im Tab **Menü → Sicherung** die Bibliothek als Datei herunterladen und auf einem anderen Gerät importieren. 
+
+*Mach das ab und zu — die Datei ist auch dein Backup.*
 
 ## Wichtig
 
@@ -57,12 +60,14 @@ Die App aktualisiert sich **nie von selbst**. Einmal installiert, läuft sie auf
 
 Wenn du wirklich eine neue Version willst:
 
-1. Im Tab **Menü → Vorlagen** die aktuelle Vorlage exportieren (Sicherung!).
+1. Im Tab **Menü** die aktuelle Biblothek exportieren (Sicherung!).
 2. App-Symbol vom Home-Bildschirm löschen.
 3. In Safari erneut `fbumann.github.io/cash-app` öffnen und **Zum Home-Bildschirm** hinzufügen.
-4. Vorlage wieder importieren.
+4. Biblothek wieder importieren.
 
 > **Tipp:** Updates nie kurz vor einer Veranstaltung. Und nicht vergessen: offene Bestellungen im Tab **Tag** gehen bei der Neuinstallation verloren — vorher CSV exportieren.
+
+*Die reinstallation von alten Versionen ist kompliziert. Macht nur ein update wenn ihr es braucht!*
 
 ## Für Entwickler
 
