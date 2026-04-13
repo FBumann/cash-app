@@ -298,13 +298,11 @@
   }
   .modal-palette .swatch { width: 44px; height: 44px; font-size: 18px; }
   .color-dot {
-    width: 32px; height: 32px; border-radius: 50%;
-    border: 2px solid var(--border);
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 1px solid var(--border);
     background: var(--surface);
-    padding: 0; flex-shrink: 0; margin-right: 10px;
-    cursor: pointer;
+    flex-shrink: 0; margin-right: 10px;
   }
-  span.color-dot { cursor: default; width: 20px; height: 20px; border-width: 1px; }
   .backup-actions {
     display: flex; flex-direction: column; gap: 8px;
     padding: 12px 16px;
@@ -834,7 +832,7 @@ function renderEditor() {
       row.className = 'editor-row';
       const dotStyle = item.color ? `background: ${item.color}` : '';
       row.innerHTML = `
-        <button class="color-dot" data-pickcolor style="${dotStyle}" aria-label="Farbe ändern"></button>
+        <span class="color-dot" style="${dotStyle}"></span>
         <button class="info" data-edit aria-label="Artikel bearbeiten">
           <div class="name">${escapeHtml(item.name)}</div>
           <div class="price">${fmt(item.price)}</div>
@@ -843,17 +841,11 @@ function renderEditor() {
           <button class="icon-btn ${inActive ? 'active' : ''}" data-toggle>${inActive ? '✓' : '+'}</button>
           <button class="icon-btn danger" data-delete>×</button>
         </div>`;
-      row.querySelector('[data-pickcolor]')?.addEventListener('click', () => {
-        colorPickerModal(item.color, color => {
-          item.color = color;
-          save(KEYS.reusables, state.reusables);
-          renderEditor();
-        });
-      });
       row.querySelector('[data-edit]')?.addEventListener('click', () => {
-        editItemModal(item, (name, price) => {
+        editItemModal(item, (name, price, color) => {
           item.name = name;
           item.price = price;
+          item.color = color;
           save(KEYS.reusables, state.reusables);
           renderEditor();
         });
@@ -1136,30 +1128,6 @@ function confirmModal(title, text, cb) {
   byId('modal').classList.add('active');
 }
 
-/** @param {string} current @param {(color: string) => void} cb */
-function colorPickerModal(current, cb) {
-  resetModal();
-  byId('modalTitle').textContent = 'Farbe wählen';
-  const palette = byId('modalPalette');
-  palette.hidden = false;
-  palette.innerHTML = '';
-  COLORS.forEach(c => {
-    const swatch = document.createElement('button');
-    swatch.type = 'button';
-    swatch.className = 'swatch' + (c.value ? '' : ' default') + (c.value === current ? ' selected' : '');
-    if (c.value) swatch.style.background = c.value;
-    if (!c.value) swatch.textContent = '–';
-    swatch.title = c.name;
-    swatch.addEventListener('click', () => {
-      closeModal();
-      cb(c.value);
-    });
-    palette.appendChild(swatch);
-  });
-  /** @type {HTMLElement} */ (byId('modalConfirm')).hidden = true;
-  byId('modal').classList.add('active');
-}
-
 /** @param {string} title @param {(price: number) => void} cb */
 function priceInputModal(title, cb) {
   resetModal();
@@ -1178,7 +1146,7 @@ function priceInputModal(title, cb) {
 
 /**
  * @param {MenuItem} item
- * @param {(name: string, price: number) => void} cb
+ * @param {(name: string, price: number, color: string) => void} cb
  */
 function editItemModal(item, cb) {
   resetModal();
@@ -1188,12 +1156,35 @@ function editItemModal(item, cb) {
   const priceIn = /** @type {HTMLInputElement} */ (byId('modalEditPrice'));
   nameIn.value = item.name;
   priceIn.value = item.price.toFixed(2).replace('.', ',');
+
+  // Inline color picker — tracks a local selection and updates the palette visuals.
+  let pickedColor = item.color;
+  const palette = byId('modalPalette');
+  palette.hidden = false;
+  const renderPalette = () => {
+    palette.innerHTML = '';
+    COLORS.forEach(c => {
+      const swatch = document.createElement('button');
+      swatch.type = 'button';
+      swatch.className = 'swatch' + (c.value ? '' : ' default') + (c.value === pickedColor ? ' selected' : '');
+      if (c.value) swatch.style.background = c.value;
+      if (!c.value) swatch.textContent = '–';
+      swatch.title = c.name;
+      swatch.addEventListener('click', () => {
+        pickedColor = c.value;
+        renderPalette();
+      });
+      palette.appendChild(swatch);
+    });
+  };
+  renderPalette();
+
   useSaveButton();
   modalCb = () => {
     const name = nameIn.value.trim();
     const price = parseEur(priceIn.value);
     if (!name || isNaN(price) || price < 0) return;
-    cb(name, price);
+    cb(name, price, pickedColor);
   };
   byId('modal').classList.add('active');
   setTimeout(() => nameIn.focus(), 50);
