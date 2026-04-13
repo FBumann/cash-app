@@ -337,8 +337,14 @@
     border-radius: 10px; padding: 12px 14px; margin-bottom: 8px;
   }
   .order-row .head {
-    display: flex; justify-content: space-between;
+    display: flex; justify-content: space-between; align-items: center;
     font-weight: 600; margin-bottom: 6px;
+  }
+  .order-row .order-right {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .order-row .order-right .icon-btn {
+    width: 36px; height: 36px; font-size: 16px;
   }
   .order-row .items { font-size: 14px; color: var(--muted); line-height: 1.5; }
 
@@ -909,8 +915,25 @@ function renderSummary() {
     row.className = 'order-row';
     const itemsText = o.items.map(i => `${i.qty}× ${i.name}`).join(', ');
     row.innerHTML = `
-      <div class="head"><span>${time}</span><span>${fmt(o.total)}</span></div>
+      <div class="head">
+        <span>${time}</span>
+        <span class="order-right">
+          <span>${fmt(o.total)}</span>
+          <button class="icon-btn danger" data-delete aria-label="Bestellung löschen">×</button>
+        </span>
+      </div>
       <div class="items">${escapeHtml(itemsText)}</div>`;
+    row.querySelector('[data-delete]')?.addEventListener('click', () => {
+      confirmModal(
+        'Bestellung löschen?',
+        `${time} · ${fmt(o.total)} — diese Bestellung wird aus dem heutigen Tag entfernt.`,
+        () => {
+          state.orders = state.orders.filter(x => x.id !== o.id);
+          save(KEYS.orders, state.orders);
+          renderSummary();
+        },
+      );
+    });
     list.appendChild(row);
   });
 }
