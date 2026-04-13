@@ -350,7 +350,7 @@
     font-size: 36px; font-weight: 700; margin-top: 4px;
   }
   .summary-actions {
-    display: flex; gap: 8px; margin-bottom: 14px;
+    display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px;
   }
   .order-row {
     background: var(--surface); border: 1px solid var(--border);
@@ -492,7 +492,10 @@
         <div class="label" style="margin-top: 10px;"><span id="orderCount">0</span> Bestellungen</div>
       </div>
       <div class="summary-actions">
-        <button class="btn btn-secondary" id="exportCsv">CSV exportieren</button>
+        <div class="backup-row">
+          <button class="btn btn-secondary" id="exportCsv">Umsatz exportieren</button>
+          <button class="btn btn-secondary" id="exportInventory">Absatz exportieren</button>
+        </div>
         <button class="btn btn-danger" id="clearDay">Zurücksetzen</button>
       </div>
       <div id="orderList"></div>
@@ -1123,6 +1126,7 @@ function formatTime(iso) {
 }
 
 byId('exportCsv').addEventListener('click', exportCsv);
+byId('exportInventory').addEventListener('click', exportInventory);
 byId('clearDay').addEventListener('click', () => {
   if (state.orders.length === 0 && state.active.length === 0) return;
   confirmModal('Zurücksetzen?', 'Alle Bestellungen und das aktive Menü werden gelöscht. Die Bibliothek bleibt erhalten.', () => {
@@ -1138,30 +1142,49 @@ function exportCsv() {
   // Semicolon-separated for EU locale Excel/Numbers
   const sep = ';';
   /** @type {(string | number)[][]} */
-  const rows = [['Zeit', 'Artikel', 'Anzahl', 'Einzelpreis', 'Zwischensumme']];
-  let dayTotal = 0;
-  state.orders.forEach(o => {
+  const rows = [['Bestellung', 'Zeit', 'Artikel', 'Anzahl', 'Einzelpreis', 'Gesamt']];
+  state.orders.forEach((o, idx) => {
+    const nr = idx + 1;
     const time = formatTime(o.time);
     o.items.forEach(i => {
-      rows.push([time, i.name, i.qty, csvNum(i.price), csvNum(i.price * i.qty)]);
+      rows.push([nr, time, i.name, i.qty, csvNum(i.price), csvNum(i.price * i.qty)]);
     });
-    rows.push([time, 'BESTELLSUMME', '', '', csvNum(o.total)]);
-    dayTotal += o.total;
   });
-  rows.push(['TAGESSUMME', '', '', '', csvNum(dayTotal)]);
+  downloadCsv(rows, `umsatz-${today()}.csv`);
+}
 
-  const csv = rows.map(r => r.map(csvCell).join(sep)).join('\r\n');
+function exportInventory() {
+  /** @type {Map<string, { name: string, qty: number }>} */
+  const counts = new Map();
+  state.orders.forEach(o => {
+    o.items.forEach(i => {
+      const entry = counts.get(i.name) ?? { name: i.name, qty: 0 };
+      entry.qty += i.qty;
+      counts.set(i.name, entry);
+    });
+  });
+  const rows = [['Artikel', 'Anzahl'],
+    ...[...counts.values()]
+      .sort((a, b) => b.qty - a.qty)
+      .map(e => [e.name, e.qty])];
+  downloadCsv(rows, `absatz-${today()}.csv`);
+}
+
+/** @param {(string | number)[][]} rows @param {string} filename */
+function downloadCsv(rows, filename) {
+  const csv = rows.map(r => r.map(csvCell).join(';')).join('\r\n');
   const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  const stamp = new Date().toISOString().slice(0, 10);
   a.href = url;
-  a.download = `kasse-${stamp}.csv`;
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+
+function today() { return new Date().toISOString().slice(0, 10); }
 
 /** @param {number} n */
 function csvNum(n) { return n.toFixed(2).replace('.', ','); }

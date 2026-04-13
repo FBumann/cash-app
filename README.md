@@ -37,7 +37,7 @@ Einmal mit Internetverbindung:
 
 - **Kasse** – Artikel antippen → Warenkorb → **Kassieren** → Bargeld eingeben → **Bestätigen**.
 - **Menü** – In der Bibliothek Artikel anlegen, mit `+` ins heutige Menü übernehmen.
-- **Abrechnung** – Umsatz und Bestellungen, **CSV exportieren**, am Ende **Zurücksetzen**.
+- **Abrechnung** – Umsatz und Bestellungen, **Umsatz exportieren**, **Absatz exportieren**, am Ende **Zurücksetzen**.
 
 ## Sicherung
 
@@ -48,8 +48,8 @@ Dafür im Tab **Menü → Vorlagen** auf **Vorlage exportieren** drücken und au
 
 ## Wichtig
 
-- ✅ Vor jedem Fest kurz in den Tab **Abrechnung** schauen — sollte leer sein. Falls nicht: erst CSV exportieren, dann **Zurücksetzen**.
-- ✅ Nach jedem Fest **CSV exportieren**, dann **Zurücksetzen**.
+- ✅ Vor jedem Fest kurz in den Tab **Abrechnung** schauen — sollte leer sein. Falls nicht: erst Umsatz exportieren, dann **Zurücksetzen**.
+- ✅ Nach jedem Fest **Umsatz exportieren**, dann **Zurücksetzen**.
 - ❌ Nicht das App-Symbol löschen — sonst sind alle Daten weg.
 - ❌ Nicht in Safari „Verlauf und Websitedaten löschen" — gleiches Problem.
 - ❌ Keine Synchronisation zwischen Geräten. Jedes Gerät hat seine eigene Kasse.
@@ -65,7 +65,7 @@ Wenn du wirklich eine neue Version willst:
 3. In Safari erneut `fbumann.github.io/cash-app` öffnen und **Zum Home-Bildschirm** hinzufügen.
 4. **Vorlage laden** drücken und die gesicherte Datei wählen.
 
-> **Tipp:** Updates nie kurz vor einer Veranstaltung. Und nicht vergessen: offene Bestellungen im Tab **Abrechnung** gehen bei der Neuinstallation verloren — vorher CSV exportieren.
+> **Tipp:** Updates nie kurz vor einer Veranstaltung. Und nicht vergessen: offene Bestellungen im Tab **Abrechnung** gehen bei der Neuinstallation verloren — vorher Umsatz exportieren.
 
 ### Zurück auf eine ältere Version
 
