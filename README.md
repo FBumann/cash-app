@@ -37,19 +37,19 @@ Einmal mit Internetverbindung:
 
 - **Kasse** – Artikel antippen → Warenkorb → **Kassieren** → Bargeld eingeben → **Bestätigen**.
 - **Menü** – In der Bibliothek Artikel anlegen, mit `+` ins heutige Menü übernehmen.
-- **Tag** – Umsatz und Bestellungen, **CSV exportieren**, am Ende **Tag zurücksetzen**.
+- **Abrechnung** – Umsatz und Bestellungen, **CSV exportieren**, am Ende **Zurücksetzen**.
 
 ## Sicherung
 
-Die **angelegten Artikel werden als Bibliothek gespeichert**. Die angelegte Bibliothek kann **auf ein anderes Gerät übertragen** werden.
-Dafür im Tab **Menü → Sicherung** die Bibliothek als Datei herunterladen und auf einem anderen Gerät importieren. 
+Die **angelegten Artikel werden in der Bibliothek gespeichert**. Die Bibliothek kann **auf ein anderes Gerät übertragen** werden.
+Dafür im Tab **Menü → Vorlagen** auf **Vorlage exportieren** drücken und auf einem anderen Gerät importieren.
 
 *Mach das ab und zu — die Datei ist auch dein Backup.*
 
 ## Wichtig
 
-- ✅ Vor jedem Fest kurz in den Tab **Tag** schauen — sollte leer sein. Falls nicht: erst CSV exportieren, dann **Tag zurücksetzen**.
-- ✅ Nach jedem Fest **CSV exportieren**, dann **Tag zurücksetzen**.
+- ✅ Vor jedem Fest kurz in den Tab **Abrechnung** schauen — sollte leer sein. Falls nicht: erst CSV exportieren, dann **Zurücksetzen**.
+- ✅ Nach jedem Fest **CSV exportieren**, dann **Zurücksetzen**.
 - ❌ Nicht das App-Symbol löschen — sonst sind alle Daten weg.
 - ❌ Nicht in Safari „Verlauf und Websitedaten löschen" — gleiches Problem.
 - ❌ Keine Synchronisation zwischen Geräten. Jedes Gerät hat seine eigene Kasse.
@@ -60,12 +60,12 @@ Die App aktualisiert sich **nie von selbst**. Einmal installiert, läuft sie auf
 
 Wenn du wirklich eine neue Version willst:
 
-1. Im Tab **Menü** die aktuelle Biblothek exportieren (Sicherung!).
+1. Im Tab **Menü → Vorlagen** auf **Vorlage exportieren** drücken (Sicherung!).
 2. App-Symbol vom Home-Bildschirm löschen.
 3. In Safari erneut `fbumann.github.io/cash-app` öffnen und **Zum Home-Bildschirm** hinzufügen.
-4. Biblothek wieder importieren.
+4. **Vorlage laden** drücken und die gesicherte Datei wählen.
 
-> **Tipp:** Updates nie kurz vor einer Veranstaltung. Und nicht vergessen: offene Bestellungen im Tab **Tag** gehen bei der Neuinstallation verloren — vorher CSV exportieren.
+> **Tipp:** Updates nie kurz vor einer Veranstaltung. Und nicht vergessen: offene Bestellungen im Tab **Abrechnung** gehen bei der Neuinstallation verloren — vorher CSV exportieren.
 
 ### Zurück auf eine ältere Version
 
@@ -79,7 +79,7 @@ fbumann.github.io/cash-app/versions/v20/
 
 Vorgehen: App-Symbol löschen → gewünschte Versions-URL in Safari öffnen → **Zum Home-Bildschirm**.
 
-> **Warnung:** Die Kasse speichert ihre Daten (Bibliothek, aktives Menü, Tag) in einem Bereich, den sich **alle Versionen teilen**. Eine ältere Version kennt neuere Felder (z. B. Artikel-Farben) nicht und entfernt sie beim Speichern. Beim Rollback also unbedingt **vorher die Bibliothek exportieren** — im Ernstfall kannst du die Farben und anderes später manuell wiederherstellen.
+> **Warnung:** Die Kasse speichert ihre Daten (Bibliothek, aktives Menü, Tag) in einem Bereich, den sich **alle Versionen teilen**. Eine ältere Version kennt neuere Felder (z. B. Artikel-Farben) nicht und entfernt sie beim Speichern. Beim Rollback also unbedingt **vorher die Vorlage exportieren** — im Ernstfall kannst du die Farben und anderes später manuell wiederherstellen.
 
 ## Für Entwickler
 

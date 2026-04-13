@@ -405,7 +405,7 @@
   <nav class="tabs">
     <button data-tab="register" class="active">Kasse</button>
     <button data-tab="editor">Menü</button>
-    <button data-tab="summary">Tag</button>
+    <button data-tab="summary">Abrechnung</button>
   </nav>
 
   <main>
@@ -467,7 +467,7 @@
           <label class="btn btn-secondary" for="importLibFile">Vorlage laden</label>
           <input type="file" id="importLibFile" accept="application/json,.json" hidden>
         </div>
-        <p class="hint">Speichert die komplette Bibliothek und das aktive Menü als Datei. Dient als Sicherung oder als fertige Vorlage für nächste Veranstaltungen.</p>
+        <p class="hint">Speichert die Bibliothek und das aktive Menü als Datei. Dient als Sicherung oder als fertige Vorlage für nächste Veranstaltungen.</p>
       </div>
       <div class="editor-section">
         <h3>Zurücksetzen</h3>
@@ -488,7 +488,7 @@
       </div>
       <div class="summary-actions">
         <button class="btn btn-secondary" id="exportCsv">CSV exportieren</button>
-        <button class="btn btn-danger" id="clearDay">Tag zurücksetzen</button>
+        <button class="btn btn-danger" id="clearDay">Zurücksetzen</button>
       </div>
       <div id="orderList"></div>
     </section>
@@ -525,7 +525,7 @@
  */
 
 /** Single source of truth for the app version. Must match sw.js CACHE. */
-const APP_VERSION = '22';
+const APP_VERSION = '23';
 
 /** Fixed palette for menu item colors. Empty string = default (no color). */
 const COLORS = [
@@ -563,9 +563,10 @@ const KEYS = {
 /** Seed values for a fresh install so the user has something to play with. */
 /** @type {MenuItem[]} */
 const DEFAULT_REUSABLES = [
-  { id: 'default-bier',  name: 'Bier',      price: 2.5, color: '#f59e0b' },
-  { id: 'default-wurst', name: 'Bratwurst', price: 3,   color: '#84cc16' },
-  { id: 'default-cola',  name: 'Cola',      price: 1.5, color: '#e11d48' },
+  { id: 'default-kaffee',         name: 'Kaffee',         price: 1.5, color: '#d97706' }, // amber
+  { id: 'default-kuchen',         name: 'Kuchen',         price: 2,   color: '#e11d48' }, // rose
+  { id: 'default-kartoffelsalat', name: 'Kartoffelsalat', price: 3,   color: '#84cc16' }, // lime
+  { id: 'default-bier',           name: 'Bier',           price: 2.5, color: '#2563eb' }, // blue
 ];
 
 // First launch only: inject defaults if the reusables key has never been set.
@@ -1118,7 +1119,7 @@ function formatTime(iso) {
 byId('exportCsv').addEventListener('click', exportCsv);
 byId('clearDay').addEventListener('click', () => {
   if (state.orders.length === 0 && state.active.length === 0) return;
-  confirmModal('Tag zurücksetzen?', 'Alle Bestellungen und das aktive Menü werden gelöscht. Die Bibliothek bleibt erhalten.', () => {
+  confirmModal('Zurücksetzen?', 'Alle Bestellungen und das aktive Menü werden gelöscht. Die Bibliothek bleibt erhalten.', () => {
     state.orders = [];
     state.active = [];
     state.cart = [];
