@@ -315,6 +315,8 @@
     padding: 12px 16px;
   }
   .backup-actions .btn { width: 100%; }
+  .backup-row { display: flex; gap: 8px; }
+  .backup-row .btn { flex: 1; width: unset; }
   .hint {
     margin: 0; padding: 0 16px 14px 16px;
     color: var(--muted); font-size: 13px; line-height: 1.4;
@@ -464,11 +466,13 @@
       <div class="editor-section">
         <h3>Vorlagen</h3>
         <div class="backup-actions">
-          <button class="btn btn-secondary" id="exportLib">Vorlage exportieren</button>
-          <label class="btn btn-secondary" for="importLibFile">Vorlage laden</label>
-          <input type="file" id="importLibFile" accept="application/json,.json" hidden>
+          <div class="backup-row">
+            <button class="btn btn-secondary" id="exportLib">Vorlage exportieren</button>
+            <label class="btn btn-secondary" for="importLibFile">Vorlage laden</label>
+            <input type="file" id="importLibFile" accept="application/json,.json" hidden>
+          </div>
+          <p class="hint">Speichert die Bibliothek und das aktive Menü als Datei. Dient als Sicherung oder als fertige Vorlage für nächste Veranstaltungen.</p>
         </div>
-        <p class="hint">Speichert die Bibliothek und das aktive Menü als Datei. Dient als Sicherung oder als fertige Vorlage für nächste Veranstaltungen.</p>
       </div>
       <div class="editor-section">
         <h3>Zurücksetzen</h3>
@@ -569,6 +573,7 @@ const DEFAULT_REUSABLES = [
   { id: 'default-kartoffelsalat', name: 'Kartoffelsalat', price: 3,   color: '#84cc16' }, // lime
   { id: 'default-bier',           name: 'Bier',           price: 2.5, color: '#2563eb' }, // blue
 ];
+
 
 // First launch only: inject defaults if the reusables key has never been set.
 // An explicit `[]` (user cleared everything) is respected and not re-seeded.
@@ -1312,6 +1317,7 @@ byId('resetAll').addEventListener('click', () => {
     'Bibliothek, aktives Menü und Bestellungen werden entfernt. Dieser Schritt kann nicht rückgängig gemacht werden.',
     () => {
       Object.values(KEYS).forEach(k => localStorage.removeItem(k));
+      localStorage.setItem(KEYS.reusables, JSON.stringify([])); // prevent re-seeding defaults
       location.reload();
     },
   );
