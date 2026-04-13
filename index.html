@@ -273,7 +273,8 @@
     font-weight: 600; min-height: 48px; min-width: 56px;
   }
   .palette-row {
-    display: flex; flex-wrap: wrap; gap: 8px;
+    display: flex; flex-wrap: wrap; gap: 14px;
+    padding: 6px 0;
   }
   .swatch {
     width: 36px; height: 36px; border-radius: 50%;
@@ -283,7 +284,10 @@
     color: white; font-size: 16px; font-weight: 600;
     flex-shrink: 0;
   }
-  .swatch.selected { border-color: var(--text); border-width: 3px; }
+  .swatch.selected {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+  }
   .swatch.default {
     background: var(--surface-2);
     color: var(--muted);
