@@ -368,6 +368,23 @@
   .modal h3 { margin: 0 0 8px 0; font-size: 19px; }
   .modal p { margin: 0 0 18px 0; color: var(--muted); }
   .modal .modal-actions { display: flex; gap: 8px; }
+  .modal-form {
+    display: flex; flex-direction: column; gap: 8px;
+    padding: 4px 0 16px 0;
+  }
+  .modal-form-input {
+    background: var(--surface-2);
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px; font-size: 17px;
+    color: var(--text); min-height: 48px;
+  }
+  .modal-form-input:focus { outline: none; border-color: var(--accent); }
+  button.info {
+    background: none; border: none; color: inherit;
+    padding: 0; text-align: left; cursor: pointer;
+    flex: 1; min-width: 0;
+  }
+  button.info:active { opacity: 0.6; }
 </style>
 </head>
 <body>
@@ -461,6 +478,10 @@
     <h3 id="modalTitle"></h3>
     <p id="modalText"></p>
     <div class="modal-palette" id="modalPalette" hidden></div>
+    <div class="modal-form" id="modalForm" hidden>
+      <input class="modal-form-input" id="modalEditName" type="text" placeholder="Name">
+      <input class="modal-form-input" id="modalEditPrice" type="text" inputmode="decimal" placeholder="0,00">
+    </div>
     <input class="input-cash" id="modalInput" type="text" inputmode="decimal" placeholder="0,00" hidden>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="modalCancel">Abbrechen</button>
@@ -814,10 +835,10 @@ function renderEditor() {
       const dotStyle = item.color ? `background: ${item.color}` : '';
       row.innerHTML = `
         <button class="color-dot" data-pickcolor style="${dotStyle}" aria-label="Farbe ändern"></button>
-        <div class="info">
+        <button class="info" data-edit aria-label="Artikel bearbeiten">
           <div class="name">${escapeHtml(item.name)}</div>
           <div class="price">${fmt(item.price)}</div>
-        </div>
+        </button>
         <div class="actions">
           <button class="icon-btn ${inActive ? 'active' : ''}" data-toggle>${inActive ? '✓' : '+'}</button>
           <button class="icon-btn danger" data-delete>×</button>
@@ -825,6 +846,14 @@ function renderEditor() {
       row.querySelector('[data-pickcolor]')?.addEventListener('click', () => {
         colorPickerModal(item.color, color => {
           item.color = color;
+          save(KEYS.reusables, state.reusables);
+          renderEditor();
+        });
+      });
+      row.querySelector('[data-edit]')?.addEventListener('click', () => {
+        editItemModal(item, (name, price) => {
+          item.name = name;
+          item.price = price;
           save(KEYS.reusables, state.reusables);
           renderEditor();
         });
@@ -1069,9 +1098,15 @@ function csvCell(v) {
 /** @type {(() => void) | null} */
 let modalCb = null;
 
-function closeModal() {
-  byId('modal').classList.remove('active');
+/**
+ * Reset all modal sub-elements to their default (hidden) state and
+ * restore the confirm button to the destructive variant. Every modal
+ * helper calls this before configuring what it needs.
+ */
+function resetModal() {
+  byId('modalText').textContent = '';
   byId('modalPalette').hidden = true;
+  byId('modalForm').hidden = true;
   /** @type {HTMLInputElement} */ (byId('modalInput')).hidden = true;
   const confirmBtn = /** @type {HTMLElement} */ (byId('modalConfirm'));
   confirmBtn.hidden = false;
@@ -1080,25 +1115,31 @@ function closeModal() {
   modalCb = null;
 }
 
+function closeModal() {
+  byId('modal').classList.remove('active');
+  resetModal();
+}
+
+/** Switch the confirm button to the non-destructive (blue) style. */
+function useSaveButton() {
+  const confirmBtn = /** @type {HTMLElement} */ (byId('modalConfirm'));
+  confirmBtn.classList.remove('btn-danger');
+  confirmBtn.classList.add('btn-primary');
+}
+
 /** @param {string} title @param {string} text @param {() => void} cb */
 function confirmModal(title, text, cb) {
+  resetModal();
   byId('modalTitle').textContent = title;
   byId('modalText').textContent = text;
-  byId('modalPalette').hidden = true;
-  /** @type {HTMLInputElement} */ (byId('modalInput')).hidden = true;
-  const confirmBtn = /** @type {HTMLElement} */ (byId('modalConfirm'));
-  confirmBtn.hidden = false;
-  confirmBtn.classList.remove('btn-primary');
-  confirmBtn.classList.add('btn-danger');
   modalCb = cb;
   byId('modal').classList.add('active');
 }
 
 /** @param {string} current @param {(color: string) => void} cb */
 function colorPickerModal(current, cb) {
+  resetModal();
   byId('modalTitle').textContent = 'Farbe wählen';
-  byId('modalText').textContent = '';
-  /** @type {HTMLInputElement} */ (byId('modalInput')).hidden = true;
   const palette = byId('modalPalette');
   palette.hidden = false;
   palette.innerHTML = '';
@@ -1116,28 +1157,46 @@ function colorPickerModal(current, cb) {
     palette.appendChild(swatch);
   });
   /** @type {HTMLElement} */ (byId('modalConfirm')).hidden = true;
-  modalCb = null;
   byId('modal').classList.add('active');
 }
 
 /** @param {string} title @param {(price: number) => void} cb */
 function priceInputModal(title, cb) {
+  resetModal();
   byId('modalTitle').textContent = title;
-  byId('modalText').textContent = '';
-  byId('modalPalette').hidden = true;
   const input = /** @type {HTMLInputElement} */ (byId('modalInput'));
   input.hidden = false;
   input.value = '';
-  const confirmBtn = /** @type {HTMLElement} */ (byId('modalConfirm'));
-  confirmBtn.hidden = false;
-  confirmBtn.classList.remove('btn-danger');
-  confirmBtn.classList.add('btn-primary');
+  useSaveButton();
   modalCb = () => {
     const price = parseEur(input.value);
     if (!isNaN(price) && price > 0) cb(price);
   };
   byId('modal').classList.add('active');
   setTimeout(() => input.focus(), 50);
+}
+
+/**
+ * @param {MenuItem} item
+ * @param {(name: string, price: number) => void} cb
+ */
+function editItemModal(item, cb) {
+  resetModal();
+  byId('modalTitle').textContent = 'Artikel bearbeiten';
+  byId('modalForm').hidden = false;
+  const nameIn = /** @type {HTMLInputElement} */ (byId('modalEditName'));
+  const priceIn = /** @type {HTMLInputElement} */ (byId('modalEditPrice'));
+  nameIn.value = item.name;
+  priceIn.value = item.price.toFixed(2).replace('.', ',');
+  useSaveButton();
+  modalCb = () => {
+    const name = nameIn.value.trim();
+    const price = parseEur(priceIn.value);
+    if (!name || isNaN(price) || price < 0) return;
+    cb(name, price);
+  };
+  byId('modal').classList.add('active');
+  setTimeout(() => nameIn.focus(), 50);
 }
 
 byId('modalCancel').addEventListener('click', closeModal);
