@@ -1,7 +1,7 @@
 // @ts-check
 /* eslint-env serviceworker */
 
-const CACHE = 'cash-app-v11';
+const CACHE = 'cash-app-v12';
 const ASSETS = ['./', './index.html'];
 
 self.addEventListener('install', /** @param {ExtendableEvent} e */ e => {
@@ -20,21 +20,12 @@ self.addEventListener('activate', /** @param {ExtendableEvent} e */ e => {
   );
 });
 
-// Stale-while-revalidate: serve cache instantly, refresh in background.
+// Cache-only: always serve from cache. Never re-fetches once installed,
+// so the app stays on exactly the version it was installed with. To get
+// a new version, the user reinstalls from Safari (see README).
 self.addEventListener('fetch', /** @param {FetchEvent} e */ e => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      const networkFetch = fetch(e.request)
-        .then(res => {
-          if (res && res.ok) {
-            const clone = res.clone();
-            caches.open(CACHE).then(c => c.put(e.request, clone));
-          }
-          return res;
-        })
-        .catch(() => cached);
-      return cached || networkFetch;
-    })
+    caches.match(e.request).then(cached => cached || fetch(e.request))
   );
 });
