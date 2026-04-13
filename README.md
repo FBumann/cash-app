@@ -11,6 +11,27 @@ Einmal mit WLAN:
 1. In Safari `fbumann.github.io/cash-app` öffnen.
 2. Teilen-Symbol → **Zum Home-Bildschirm** → **Hinzufügen**.
 3. Ab jetzt nur noch über das Symbol auf dem Home-Bildschirm starten.
+<table>
+  <tr>
+    <td align="center" width="25%">Teile die Website</td>
+    <td align="center" width="25%">Wähle "Zum Homescreen hinzufügen"</td>
+    <td align="center" width="25%">Wähle einen Namen für deine App und drücke "Hinzufügen"</td>
+    <td align="center" width="25%">Die App ist offline gespeichert und bereit</td>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/0ffc18ae-0107-4e14-9c0e-4749b6afb971" width="200" /></td>
+    <td><img src="https://github.com/user-attachments/assets/7246fb5a-7ef5-4d52-be2e-2b6c74198196" width="200" /></td>
+    <td><img src="https://github.com/user-attachments/assets/140d5fe0-ac44-4a77-8162-407d3edb7d2b" width="200" /></td>
+    <td><img src="https://github.com/user-attachments/assets/8f2b8254-92cf-4642-8716-955d237bcb22" width="200" /></td>
+  </tr>
+  <tr>
+    <td align="center">1</td>
+    <td align="center">2</td>
+    <td align="center">3</td>
+    <td align="center">4</td>
+  </tr>
+</table>
+
 
 ## Bedienen
 
