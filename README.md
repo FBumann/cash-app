@@ -37,6 +37,7 @@ Einmal mit Internetverbindung:
 
 - **Kasse** – Artikel antippen → Warenkorb → **Kassieren** → Bargeld eingeben → **Bestätigen**.
 - **Menü** – In der Bibliothek Artikel anlegen, mit `+` ins heutige Menü übernehmen.
+- **Bestand** – Eingekaufte Mengen pro Artikel eintragen, sieht direkt wie viel verkauft wurde und wie viel übrig ist.
 - **Abrechnung** – Umsatz und Bestellungen, **Umsatz exportieren**, **Absatz exportieren**, am Ende **Zurücksetzen**.
 
 ## Sicherung
@@ -79,7 +80,7 @@ fbumann.github.io/cash-app/versions/v20/
 
 Vorgehen: App-Symbol löschen → gewünschte Versions-URL in Safari öffnen → **Zum Home-Bildschirm**.
 
-> **Warnung:** Die Kasse speichert ihre Daten (Bibliothek, aktives Menü, Tag) in einem Bereich, den sich **alle Versionen teilen**. Eine ältere Version kennt neuere Felder (z. B. Artikel-Farben) nicht und entfernt sie beim Speichern. Beim Rollback also unbedingt **vorher die Vorlage exportieren** — im Ernstfall kannst du die Farben und anderes später manuell wiederherstellen.
+> **Warnung:** Die Kasse speichert ihre Daten (Bibliothek, aktives Menü, Bestand, Tag) in einem Bereich, den sich **alle Versionen teilen**. Eine ältere Version kennt neuere Felder (z. B. Artikel-Farben) nicht und entfernt sie beim Speichern. Beim Rollback also unbedingt **vorher die Vorlage exportieren** — im Ernstfall kannst du die Farben und anderes später manuell wiederherstellen.
 
 ## Für Entwickler
 
