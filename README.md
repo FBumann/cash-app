@@ -73,9 +73,9 @@ Wenn du wirklich eine neue Version willst:
 Falls eine neue Version Probleme macht, kannst du eine bestimmte alte Version installieren. Jede veröffentlichte Version liegt unter einer eigenen URL:
 
 ```
-fbumann.github.io/vereinskasse/versions/v18/
-fbumann.github.io/vereinskasse/versions/v19/
-fbumann.github.io/vereinskasse/versions/v20/
+fbumann.github.io/vereinskasse/versions/v25/
+fbumann.github.io/vereinskasse/versions/v26/
+fbumann.github.io/vereinskasse/versions/v27/
 ```
 
 Vorgehen: App-Symbol löschen → gewünschte Versions-URL in Safari öffnen → **Zum Home-Bildschirm**.
