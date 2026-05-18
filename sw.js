@@ -1,7 +1,7 @@
 // @ts-check
 /* eslint-env serviceworker */
 
-const CACHE = 'cash-app-v26';
+const CACHE = 'cash-app-v27';
 const ASSETS = ['./', './index.html'];
 
 self.addEventListener('install', /** @param {ExtendableEvent} e */ e => {
