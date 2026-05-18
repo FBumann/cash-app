@@ -95,6 +95,15 @@ Eine einzige `index.html` plus `sw.js` (Service Worker für Offline). Reines HTM
 
 Lokale Vorschau: `npx serve -l 3000 . & open http://localhost:3000`
 
+### Version bumpen
+
+Vor dem Merge auf `main` bei nutzersichtbaren Änderungen die Versionsnummer hochzählen. Zwei Stellen müssen synchron sein:
+
+- `index.html`: `const APP_VERSION = 'N'` — wird im Settings-Tab angezeigt und treibt den Release-Workflow.
+- `sw.js`: `const CACHE = 'cash-app-vN'` — muss zu `APP_VERSION` passen, sonst serviert der Service Worker veraltete Inhalte.
+
+Commit-Message-Konvention: `Bump to vN` (eigener Commit oder Teil eines Feature-Commits — egal, solange beide Werte zusammen geändert werden).
+
 ### Release-Workflow
 
 Push auf `main` mit einer neuen `APP_VERSION` triggert `.github/workflows/release.yml`:
@@ -102,3 +111,5 @@ Push auf `main` mit einer neuen `APP_VERSION` triggert `.github/workflows/releas
 1. Tag `vN` wird angelegt, GitHub Release mit Notes aus den Commit-Messages seit dem letzten Tag.
 2. `index.html` + `sw.js` werden auf den `gh-pages`-Branch deployed — einmal im Root (latest) und einmal nach `versions/vN/` (Rollback-Ziel).
 3. GitHub Pages serviert aus `gh-pages`, nicht aus `main`. `main` bleibt reiner Source-Code, alle veröffentlichten Artefakte leben in `gh-pages`.
+
+Der Workflow läuft bei jedem Push, der `index.html` ändert, überspringt aber Tag/Release/Deploy, wenn `vN` bereits existiert — ein Push ohne Versionsbump ist also harmlos, deployt aber auch nichts Neues.
