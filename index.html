@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Kasse">
+<meta name="apple-mobile-web-app-title" content="Vereinskasse">
 <title>Vereinskasse</title>
 <style>
   :root {
@@ -321,11 +321,15 @@
     margin: 0; padding: 0 16px 14px 16px;
     color: var(--muted); font-size: 13px; line-height: 1.4;
   }
-  .version-footer {
-    margin: 4px 0 20px 0; padding: 0;
-    text-align: center; color: var(--muted); font-size: 12px;
+  .about-footer {
+    margin: 4px 0 20px 0; padding: 0 16px;
+    text-align: center; color: var(--muted); font-size: 13px; line-height: 1.5;
   }
-  .version-footer a { color: var(--muted); text-decoration: underline; }
+  .about-footer a { color: var(--muted); text-decoration: underline; }
+  .about-footer .about-links { margin-top: 4px; }
+  .about-footer .about-links a { margin: 0 6px; white-space: nowrap; }
+  .about-footer .about-version { font-size: 12px; }
+  .about-footer .about-fine { font-size: 11px; font-style: italic; margin-top: 6px; }
   .form-error {
     margin: 0; padding: 4px 2px 0 2px;
     color: var(--danger); font-size: 13px; line-height: 1.3;
@@ -516,7 +520,16 @@
         </div>
         <p class="hint">Entfernt Bibliothek, aktives Menü und alle Bestellungen. Die App startet danach wie bei einer frischen Installation.</p>
       </div>
-      <p class="version-footer">cash-app: v<span id="appVersion"></span> · <a href="https://github.com/FBumann/cash-app" target="_blank" rel="noopener">GitHub</a></p>
+      <div class="about-footer">
+        <p class="about-version">Vereinskasse · v<span id="appVersion"></span></p>
+        <p>Gemacht für Vereinsfeste. Wenn du sie nutzt, freu ich mich über ein Lebenszeichen.</p>
+        <p class="about-links">
+          <a href="https://github.com/FBumann/vereinskasse" target="_blank" rel="noopener">★ GitHub</a>
+          <a href="mailto:vereinskasse@fxbumann.de?subject=Vereinskasse" target="_blank" rel="noopener">✉ Schreib mir</a>
+          <a href="https://paypal.me/fxbumann" target="_blank" rel="noopener">☕ Kaffee spendieren</a>
+        </p>
+        <p class="about-fine">Kaffee am besten als „Freunde & Familie" senden — dann ohne Gebühren.</p>
+      </div>
     </section>
 
     <!-- STOCK -->
@@ -579,7 +592,7 @@
  */
 
 /** Single source of truth for the app version. Must match sw.js CACHE. */
-const APP_VERSION = '26';
+const APP_VERSION = '27';
 
 /** Fixed palette for menu item colors. Empty string = default (no color). */
 const COLORS = [

@@ -1,14 +1,14 @@
-# cash-app
+# Vereinskasse
 
 Eine Kasse für Vereinsfeste. Läuft offline auf iPad/iPhone.
 
-**App:** https://fbumann.github.io/cash-app/
+**App:** https://fbumann.github.io/vereinskasse/
 
 ## Einrichten
 
 Einmal mit Internetverbindung:
 
-1. In Safari `fbumann.github.io/cash-app` öffnen.
+1. In Safari `fbumann.github.io/vereinskasse` öffnen.
 2. Teilen-Symbol → **Zum Home-Bildschirm** → **Hinzufügen**.
 3. Ab jetzt nur noch über das Symbol auf dem Home-Bildschirm starten.
 <table>
@@ -63,7 +63,7 @@ Wenn du wirklich eine neue Version willst:
 
 1. Im Tab **Menü → Vorlagen** auf **Vorlage exportieren** drücken (Sicherung!).
 2. App-Symbol vom Home-Bildschirm löschen.
-3. In Safari erneut `fbumann.github.io/cash-app` öffnen und **Zum Home-Bildschirm** hinzufügen.
+3. In Safari erneut `fbumann.github.io/vereinskasse` öffnen und **Zum Home-Bildschirm** hinzufügen.
 4. **Vorlage laden** drücken und die gesicherte Datei wählen.
 
 > **Tipp:** Updates nie kurz vor einer Veranstaltung. Und nicht vergessen: offene Bestellungen im Tab **Abrechnung** gehen bei der Neuinstallation verloren — vorher Umsatz exportieren.
@@ -73,20 +73,36 @@ Wenn du wirklich eine neue Version willst:
 Falls eine neue Version Probleme macht, kannst du eine bestimmte alte Version installieren. Jede veröffentlichte Version liegt unter einer eigenen URL:
 
 ```
-fbumann.github.io/cash-app/versions/v18/
-fbumann.github.io/cash-app/versions/v19/
-fbumann.github.io/cash-app/versions/v20/
+fbumann.github.io/vereinskasse/versions/v18/
+fbumann.github.io/vereinskasse/versions/v19/
+fbumann.github.io/vereinskasse/versions/v20/
 ```
 
 Vorgehen: App-Symbol löschen → gewünschte Versions-URL in Safari öffnen → **Zum Home-Bildschirm**.
 
 > **Warnung:** Die Kasse speichert ihre Daten (Bibliothek, aktives Menü, Bestand, Tag) in einem Bereich, den sich **alle Versionen teilen**. Eine ältere Version kennt neuere Felder (z. B. Artikel-Farben) nicht und entfernt sie beim Speichern. Beim Rollback also unbedingt **vorher die Vorlage exportieren** — im Ernstfall kannst du die Farben und anderes später manuell wiederherstellen.
 
+## Kontakt
+
+Gemacht für Vereinsfeste. Wenn du sie nutzt, freu ich mich über ein Lebenszeichen.
+
+- ✉ [Schreib mir](mailto:vereinskasse@fxbumann.de?subject=Vereinskasse)
+- ☕ [Kaffee spendieren](https://paypal.me/fxbumann) — am besten als „Freunde & Familie" senden, dann ohne Gebühren.
+
 ## Für Entwickler
 
 Eine einzige `index.html` plus `sw.js` (Service Worker für Offline). Reines HTML/CSS/JavaScript. Kein Build, keine Abhängigkeiten. `// @ts-check` + JSDoc für Typprüfung im Editor. Daten in `localStorage`. CSV-Export per `Blob`-Download. Sprache: Deutsch, EUR mit `,` als Dezimaltrenner.
 
 Lokale Vorschau: `npx serve -l 3000 . & open http://localhost:3000`
+
+### Version bumpen
+
+Vor dem Merge auf `main` bei nutzersichtbaren Änderungen die Versionsnummer hochzählen. Zwei Stellen müssen synchron sein:
+
+- `index.html`: `const APP_VERSION = 'N'` — wird im Settings-Tab angezeigt und treibt den Release-Workflow.
+- `sw.js`: `const CACHE = 'vereinskasse-vN'` — muss zu `APP_VERSION` passen, sonst serviert der Service Worker veraltete Inhalte.
+
+Commit-Message-Konvention: `Bump to vN` (eigener Commit oder Teil eines Feature-Commits — egal, solange beide Werte zusammen geändert werden).
 
 ### Release-Workflow
 
@@ -95,3 +111,5 @@ Push auf `main` mit einer neuen `APP_VERSION` triggert `.github/workflows/releas
 1. Tag `vN` wird angelegt, GitHub Release mit Notes aus den Commit-Messages seit dem letzten Tag.
 2. `index.html` + `sw.js` werden auf den `gh-pages`-Branch deployed — einmal im Root (latest) und einmal nach `versions/vN/` (Rollback-Ziel).
 3. GitHub Pages serviert aus `gh-pages`, nicht aus `main`. `main` bleibt reiner Source-Code, alle veröffentlichten Artefakte leben in `gh-pages`.
+
+Der Workflow läuft bei jedem Push, der `index.html` ändert, überspringt aber Tag/Release/Deploy, wenn `vN` bereits existiert — ein Push ohne Versionsbump ist also harmlos, deployt aber auch nichts Neues.
