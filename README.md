@@ -70,7 +70,7 @@ Wenn du wirklich eine neue Version willst:
 
 ### Zurück auf eine ältere Version
 
-Falls eine neue Version Probleme macht, kannst du eine bestimmte alte Version installieren. Jede ab v21 veröffentlichte Version liegt unter einer eigenen URL:
+Falls eine neue Version Probleme macht, kannst du eine bestimmte alte Version installieren. Jede veröffentlichte Version liegt unter einer eigenen URL:
 
 ```
 fbumann.github.io/vereinskasse/versions/v25/
@@ -79,8 +79,6 @@ fbumann.github.io/vereinskasse/versions/v27/
 ```
 
 Vorgehen: App-Symbol löschen → gewünschte Versions-URL in Safari öffnen → **Zum Home-Bildschirm**.
-
-> **Hinweis:** Versionen vor v21 sind nicht archiviert (die Archivierung wurde erst danach in den Release-Workflow eingebaut). Eine vollständige Liste aller verfügbaren Versionen findest du unter [Releases](https://github.com/FBumann/vereinskasse/releases).
 
 > **Warnung:** Die Kasse speichert ihre Daten (Bibliothek, aktives Menü, Bestand, Tag) in einem Bereich, den sich **alle Versionen teilen**. Eine ältere Version kennt neuere Felder (z. B. Artikel-Farben) nicht und entfernt sie beim Speichern. Beim Rollback also unbedingt **vorher die Vorlage exportieren** — im Ernstfall kannst du die Farben und anderes später manuell wiederherstellen.
 
