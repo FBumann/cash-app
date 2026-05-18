@@ -1,4 +1,4 @@
-# cash-app
+# Vereinskasse
 
 Eine Kasse für Vereinsfeste. Läuft offline auf iPad/iPhone.
 
@@ -81,6 +81,13 @@ fbumann.github.io/cash-app/versions/v20/
 Vorgehen: App-Symbol löschen → gewünschte Versions-URL in Safari öffnen → **Zum Home-Bildschirm**.
 
 > **Warnung:** Die Kasse speichert ihre Daten (Bibliothek, aktives Menü, Bestand, Tag) in einem Bereich, den sich **alle Versionen teilen**. Eine ältere Version kennt neuere Felder (z. B. Artikel-Farben) nicht und entfernt sie beim Speichern. Beim Rollback also unbedingt **vorher die Vorlage exportieren** — im Ernstfall kannst du die Farben und anderes später manuell wiederherstellen.
+
+## Kontakt
+
+Gemacht für Vereinsfeste. Wenn du sie nutzt, freu ich mich über ein Lebenszeichen.
+
+- ✉ [Schreib mir](mailto:vereinskasse@fxbumann.de?subject=Vereinskasse)
+- ☕ [Kaffee spendieren](https://paypal.me/fxbumann) — am besten als „Freunde & Familie" senden, dann ohne Gebühren.
 
 ## Für Entwickler
 
